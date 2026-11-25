@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/>
-<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0b3d2b"><title>MISRIYYA HEALTH CARE — V112 Appointments diary + follow-up for any patient</title>
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0b3d2b"><title>MISRIYYA HEALTH CARE — V113 Diary as date boxes (phone layout)</title>
 <style>
 .nav-burger{flex-shrink:0;width:42px;height:42px;border:1px solid var(--line);background:#fff;border-radius:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:0}
 .nav-burger span{display:block;width:20px;height:2.5px;border-radius:2px;background:var(--ink)}
@@ -5332,6 +5332,130 @@ details.v140-hist li{margin-bottom:6px}
  const ab=document.querySelector('#apptTabs [data-av="all"]');if(ab)ab.textContent='📅 Diary';
  const h=document.querySelector('#apptAllCard h3');if(h)h.textContent='Appointments Diary';
  try{if(document.getElementById('apptAllCard')&&getComputedStyle(document.getElementById('apptAllCard')).display!=='none')window.renderAppointments();}catch(_){}
+})();
+</script>
+
+<style>
+/* V113 diary: 2-column date boxes, phone-friendly */
+#scheduler .grid>*{min-width:0}
+#apptAllCard{min-width:0;max-width:100%;overflow:hidden}
+#apptList{overflow:visible}
+.v113-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
+.v113-box{border:1px solid #d6e4dc;background:#fff;border-radius:16px;padding:12px;text-align:left;cursor:pointer;font:inherit;color:inherit;min-width:0}
+.v113-box .dt{font-size:20px;font-weight:800;line-height:1.15}
+.v113-box .wd{font-size:13px;color:#667085;font-weight:700;margin-top:2px}
+.v113-box .ct{font-size:12.5px;margin-top:8px;line-height:1.5;color:#344054}
+.v113-box .ct b{font-weight:800}
+.v113-box.today{border:2px solid #0b5d3b}
+.v113-box.today .wd{color:#0b5d3b}
+.v113-box.empty .ct{color:#98a2b3}
+.v113-box.past{background:#f7f8f7}
+.v113-more{display:block;width:100%;margin:12px 0 4px}
+.v113-top{display:flex;align-items:center;gap:8px;margin:2px 0 12px}
+.v113-top h3{margin:0;font-size:17px;flex:1;min-width:0}
+.v113-top .sub{font-size:12.5px;color:#667085;font-weight:600}
+.v113-p{border:1px solid #e4ebe7;border-radius:14px;padding:11px 12px;margin-bottom:9px;background:#fff}
+.v113-p.done{opacity:.6}.v113-p.cancelled{opacity:.45}
+.v113-p .r1{display:flex;align-items:baseline;gap:8px;justify-content:space-between}
+.v113-p .nm{font-weight:800;font-size:15px;min-width:0;overflow-wrap:anywhere}
+.v113-p .tm{font-weight:800;white-space:nowrap;color:#0b5d3b}
+.v113-p .r2{font-size:13px;color:#475467;margin-top:3px;overflow-wrap:anywhere}
+.v113-p .r2 a{font-weight:700}
+.v113-p .acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.v113-p .acts .btn{padding:6px 10px;font-size:12.5px}
+.v113-sec{font-size:12px;font-weight:800;color:#667085;text-transform:uppercase;letter-spacing:.04em;margin:12px 0 6px}
+</style>
+<script>
+/* V113: Diary as date boxes (2 per row, going down). Tap a date → that day's patients as cards. Rendering only; no Cloud calls. */
+(function(){
+ const $=id=>document.getElementById(id);
+ const E=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const ID=v=>String(v==null?'':v).replace(/[^A-Za-z0-9_-]/g,'');
+ const regKey=r=>String(r||'').trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
+ const todayKey=()=>localDateKey(new Date());
+ const addDays=(k,n)=>{const p=k.split('-').map(Number);return localDateKey(new Date(p[0],p[1]-1,p[2]+n));};
+ const dOf=k=>{const p=k.split('-').map(Number);return new Date(p[0],p[1]-1,p[2]);};
+ const tmin=t=>{const m=String(t||'').match(/^(\d{1,2}):(\d{2})/);return m?Number(m[1])*60+Number(m[2]):9999;};
+ let openDay=null,showPast=false;
+ function placeOf(reg,name){
+  const k=regKey(reg);let best=null;
+  for(const b of (data.bills||[])){if(!b||!b.place)continue;if((k&&regKey(b.reg)===k)||(!k&&name&&String(b.name||'').trim().toLowerCase()===String(name).trim().toLowerCase())){if(!best||new Date(b.date||0)>new Date(best.date||0))best=b;}}
+  return best?best.place:'';
+ }
+ function newCases(){
+  const m=new Map();
+  for(const b of (data.bills||[]))if(b&&b.newCase)m.set(String(b.id),b);
+  for(const b of (window.__sideBills||[])){if(!b||!b.newCase)continue;const l=m.get(String(b.id))||{};const pick=String(l.apptSetAt||'')>String(b.apptSetAt||'')?l:b;m.set(String(b.id),{...l,...b,apptDate:pick.apptDate||'',apptTime:pick.apptTime||''});}
+  return [...m.values()].filter(b=>b.apptDate);
+ }
+ function entries(){
+  const out=[];
+  for(const a of (Array.isArray(data.appointments)?data.appointments:[])){
+   if(!a||!a.date)continue;const p=a.patient||{};
+   out.push({src:'appt',id:a.id,date:String(a.date),time:String(a.time||''),name:p.name||'',reg:p.reg||'',phone:p.phone||'',place:p.place||placeOf(p.reg,p.name),kind:a.kind||'Follow-up',notes:a.notes||'',status:a.status||'pending',needsTime:a.needsTime===true||!String(a.time||'').trim(),a});
+  }
+  for(const b of newCases())out.push({src:'nc',id:b.id,date:String(b.apptDate),time:String(b.apptTime||''),name:b.name||'',reg:b.reg||'',phone:b.phone||'',place:b.place||'',kind:'New case',notes:b.age?b.age+' വയസ്സ്':'',status:'pending',needsTime:!String(b.apptTime||'').trim()});
+  return out;
+ }
+ function counts(list){const a=list.filter(e=>e.status!=='cancelled');return {nc:a.filter(e=>e.src==='nc').length,fu:a.filter(e=>e.src==='appt').length};}
+ function box(k,list,today){
+  const d=dOf(k),c=counts(list),empty=!c.nc&&!c.fu;
+  const wd=k===today?'ഇന്ന് · ':(k===addDays(today,1)?'നാളെ · ':'');
+  return '<button type="button" class="v113-box'+(k===today?' today':'')+(empty?' empty':'')+(k<today?' past':'')+'" data-v113="'+k+'">'+
+   '<div class="dt">'+d.getDate()+' '+E(d.toLocaleDateString('en-IN',{month:'short'}))+(d.getFullYear()!==new Date().getFullYear()?' '+d.getFullYear():'')+'</div>'+
+   '<div class="wd">'+wd+E(d.toLocaleDateString('en-IN',{weekday:'long'}))+'</div>'+
+   '<div class="ct">'+(empty?'ഒന്നുമില്ല':'New case: <b>'+c.nc+'</b><br>Follow-up: <b>'+c.fu+'</b>')+'</div></button>';
+ }
+ function card(e){
+  const tel=String(e.phone||'').replace(/[^0-9+]/g,'');
+  let st='';
+  if(e.src==='appt'){if(e.status==='completed')st=' · <b style="color:#087443">✓ Done</b>';else if(e.status==='cancelled')st=' · Cancelled';else{try{if(appointmentMoment(e.a)<new Date())st=' · <b style="color:#b42318">Overdue</b>';}catch(_){}}}
+  let acts='';
+  if(e.src==='appt'){const id=ID(e.id);
+   acts=e.status==='pending'?'<button class="btn'+(e.needsTime?' primary':'')+'" onclick="scheduleAppointmentTime(\''+id+'\')">'+(e.needsTime?'⏰ Set time':'Change time')+'</button><button class="btn primary" onclick="setAppointmentStatus(\''+id+'\',\'completed\')">✓ Done</button><button class="btn" onclick="setAppointmentStatus(\''+id+'\',\'cancelled\')">Cancel</button>':'<button class="btn" onclick="setAppointmentStatus(\''+id+'\',\'pending\')">Reopen</button>';
+  }
+  const bits=[e.reg?E(e.reg):'',e.place?E(e.place):'',tel?'<a href="tel:'+E(tel)+'">'+E(e.phone)+'</a>':''].filter(Boolean).join(' · ');
+  return '<div class="v113-p '+(e.status==='completed'?'done':e.status==='cancelled'?'cancelled':'')+'"><div class="r1"><div class="nm">'+E(e.name||'—')+'</div><div class="tm">'+(e.needsTime?'⏰ —':E(formatAppointmentTime(e.time)))+'</div></div>'+
+   (bits?'<div class="r2">'+bits+'</div>':'')+'<div class="r2">'+E(e.kind)+(e.notes?' · '+E(e.notes):'')+st+'</div>'+(acts?'<div class="acts">'+acts+'</div>':'')+'</div>';
+ }
+ function dayView(k,list){
+  const d=dOf(k),c=counts(list);
+  const ncs=list.filter(e=>e.src==='nc').sort((a,b)=>tmin(a.time)-tmin(b.time)),fus=list.filter(e=>e.src==='appt').sort((a,b)=>tmin(a.time)-tmin(b.time));
+  return '<div class="v113-top"><button type="button" class="btn" data-v113back="1">← തീയതികൾ</button><h3>'+d.getDate()+' '+E(d.toLocaleDateString('en-IN',{month:'long'}))+' · '+E(d.toLocaleDateString('en-IN',{weekday:'long'}))+'<div class="sub">New case '+c.nc+' · Follow-up '+c.fu+'</div></h3></div>'+
+   (!list.length?'<div class="muted" style="padding:8px 2px">ഈ ദിവസം appointment ഒന്നുമില്ല.</div>':'')+
+   (ncs.length?'<div class="v113-sec">New cases</div>'+ncs.map(card).join(''):'')+
+   (fus.length?'<div class="v113-sec">Follow-ups</div>'+fus.map(card).join(''):'');
+ }
+ window.renderAppointments=function(){
+  const host=$('apptList');if(!host)return;
+  const all=entries(),now=new Date(),today=todayKey();
+  try{updateSchedulerNavBadges();}catch(_){}
+  const pend=(data.appointments||[]).filter(a=>a&&a.status==='pending');
+  try{const up=$('apptUpcomingCount'),od=$('apptOverdueCount');if(up)up.textContent=pend.filter(a=>appointmentMoment(a)>=now).length;if(od)od.textContent=pend.filter(a=>appointmentMoment(a)<now).length;}catch(_){}
+  const f=$('apptFilter');if(f&&f.closest('div'))f.closest('div').style.display='none';
+  const byDay=new Map();for(const e of all){if(!byDay.has(e.date))byDay.set(e.date,[]);byDay.get(e.date).push(e);}
+  const q=String($('apptListSearch')?.value||'').toLowerCase().trim();
+  if(q){
+   const hits=all.filter(e=>[e.name,e.reg,e.phone,e.place].some(v=>String(v||'').toLowerCase().includes(q))).sort((a,b)=>b.date.localeCompare(a.date)||tmin(a.time)-tmin(b.time));
+   host.innerHTML=hits.length?hits.map(e=>{const d=dOf(e.date);return '<div class="v113-sec">'+d.getDate()+' '+E(d.toLocaleDateString('en-IN',{month:'short'}))+' · '+E(d.toLocaleDateString('en-IN',{weekday:'long'}))+'</div>'+card(e);}).join(''):'<div class="muted" style="padding:10px 2px">ഒന്നും കണ്ടെത്തിയില്ല.</div>';
+   return;
+  }
+  if(openDay){host.innerHTML=dayView(openDay,byDay.get(openDay)||[]);return;}
+  const keys=new Set();for(let i=0;i<14;i++)keys.add(addDays(today,i));
+  for(const k of byDay.keys()){if(k>=today||(showPast&&k>=addDays(today,-60)))keys.add(k);}
+  if(showPast)for(let i=1;i<=7;i++)keys.add(addDays(today,-i));
+  const ks=[...keys].sort();
+  host.innerHTML='<button type="button" class="btn v113-more" data-v113past="1">'+(showPast?'കഴിഞ്ഞ തീയതികൾ മറയ്ക്കുക':'← കഴിഞ്ഞ തീയതികൾ കാണിക്കുക')+'</button>'+
+   '<div class="v113-grid">'+ks.map(k=>box(k,byDay.get(k)||[],today)).join('')+'</div>';
+ };
+ document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-v113]');if(b){openDay=b.getAttribute('data-v113');window.renderAppointments();const c=$('apptAllCard');if(c)c.scrollIntoView({block:'start'});return;}
+  if(e.target.closest('[data-v113back]')){openDay=null;window.renderAppointments();return;}
+  if(e.target.closest('[data-v113past]')){showPast=!showPast;window.renderAppointments();}
+ });
+ // reopening the Diary tab starts at the date list
+ const av=window.apptView;if(typeof av==='function')window.apptView=function(v){if(v==='all')openDay=null;return av.apply(this,arguments);};
+ try{const c=$('apptAllCard');if(c&&getComputedStyle(c).display!=='none')window.renderAppointments();}catch(_){}
 })();
 </script>
 
