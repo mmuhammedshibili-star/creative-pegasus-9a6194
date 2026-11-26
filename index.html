@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/>
-<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0b3d2b"><title>MISRIYYA HEALTH CARE — V115 New case mobile + WhatsApp</title>
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0b3d2b"><title>MISRIYYA HEALTH CARE — V116 Update notice</title>
 <style>
 .nav-burger{flex-shrink:0;width:42px;height:42px;border:1px solid var(--line);background:#fff;border-radius:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:0}
 .nav-burger span{display:block;width:20px;height:2.5px;border-radius:2px;background:var(--ink)}
@@ -5469,6 +5469,32 @@ details.v140-hist li{margin-bottom:6px}
  // reopening the Diary tab starts at the date list
  const av=window.apptView;if(typeof av==='function')window.apptView=function(v){if(v==='all'){openDay=null;vm=null;}return av.apply(this,arguments);};
  try{const c=$('apptAllCard');if(c&&getComputedStyle(c).display!=='none')window.renderAppointments();}catch(_){}
+})();
+</script>
+
+<style>
+#v116Upd{position:fixed;left:12px;right:12px;bottom:14px;z-index:99999;display:none;align-items:center;gap:10px;justify-content:space-between;background:#0b5d3b;color:#fff;border-radius:14px;padding:12px 14px;box-shadow:0 8px 24px rgba(0,0,0,.25);font-weight:700}
+#v116Upd button{background:#fff;color:#0b5d3b;border:0;border-radius:10px;padding:8px 14px;font:inherit;font-weight:800;cursor:pointer}
+</style>
+<div id="v116Upd" role="status"><span>പുതിയ update ലഭ്യമാണ്</span><button type="button" id="v116UpdBtn">ഇപ്പോൾ പുതുക്കുക</button></div>
+<script>
+/* V116: tells the user when a newer version is published (checks a tiny version.json on GitHub Pages — not Supabase). */
+(function(){
+ const APP_VER='116';
+ let latest=null;
+ async function check(){
+  try{
+   const r=await fetch('version.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)return;
+   const j=await r.json();latest=String(j&&j.v||'');
+   if(latest&&latest!==APP_VER&&Number(latest)>Number(APP_VER))document.getElementById('v116Upd').style.display='flex';
+  }catch(_){}
+ }
+ document.getElementById('v116UpdBtn').addEventListener('click',()=>{location.replace(location.pathname+'?v='+(latest||Date.now()));});
+ if(location.protocol.startsWith('http')){
+  setTimeout(check,4000);
+  setInterval(check,15*60*1000);
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')check();});
+ }
 })();
 </script>
 
