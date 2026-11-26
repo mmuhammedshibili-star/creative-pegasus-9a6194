@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/>
-<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0b3d2b"><title>MISRIYYA HEALTH CARE — V113 Diary as date boxes (phone layout)</title>
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0b3d2b"><title>MISRIYYA HEALTH CARE — V114 Diary by month</title>
 <style>
 .nav-burger{flex-shrink:0;width:42px;height:42px;border:1px solid var(--line);background:#fff;border-radius:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:0}
 .nav-burger span{display:block;width:20px;height:2.5px;border-radius:2px;background:var(--ink)}
@@ -5363,6 +5363,14 @@ details.v140-hist li{margin-bottom:6px}
 .v113-p .r2 a{font-weight:700}
 .v113-p .acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
 .v113-p .acts .btn{padding:6px 10px;font-size:12.5px}
+.v114-yr{display:flex;align-items:center;justify-content:center;gap:14px;margin:4px 0 8px;font-weight:800;font-size:16px}
+.v114-yr .btn{padding:4px 12px}
+.v114-months{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-bottom:12px}
+.v114-mo{border:1px solid #d6e4dc;background:#fff;border-radius:10px;padding:8px 0;font:inherit;font-size:13px;font-weight:800;color:inherit;cursor:pointer;min-width:0;position:relative}
+.v114-mo.on{background:#0b5d3b;border-color:#0b5d3b;color:#fff}
+.v114-mo.cur:not(.on){border:2px solid #0b5d3b}
+.v114-mo .n{display:block;font-size:10.5px;font-weight:700;color:#667085;margin-top:1px}
+.v114-mo.on .n{color:#d7efe2}
 .v113-sec{font-size:12px;font-weight:800;color:#667085;text-transform:uppercase;letter-spacing:.04em;margin:12px 0 6px}
 </style>
 <script>
@@ -5376,7 +5384,7 @@ details.v140-hist li{margin-bottom:6px}
  const addDays=(k,n)=>{const p=k.split('-').map(Number);return localDateKey(new Date(p[0],p[1]-1,p[2]+n));};
  const dOf=k=>{const p=k.split('-').map(Number);return new Date(p[0],p[1]-1,p[2]);};
  const tmin=t=>{const m=String(t||'').match(/^(\d{1,2}):(\d{2})/);return m?Number(m[1])*60+Number(m[2]):9999;};
- let openDay=null,showPast=false;
+ let openDay=null,showPast=false;let vm=null;
  function placeOf(reg,name){
   const k=regKey(reg);let best=null;
   for(const b of (data.bills||[])){if(!b||!b.place)continue;if((k&&regKey(b.reg)===k)||(!k&&name&&String(b.name||'').trim().toLowerCase()===String(name).trim().toLowerCase())){if(!best||new Date(b.date||0)>new Date(best.date||0))best=b;}}
@@ -5441,20 +5449,24 @@ details.v140-hist li{margin-bottom:6px}
    return;
   }
   if(openDay){host.innerHTML=dayView(openDay,byDay.get(openDay)||[]);return;}
-  const keys=new Set();for(let i=0;i<14;i++)keys.add(addDays(today,i));
-  for(const k of byDay.keys()){if(k>=today||(showPast&&k>=addDays(today,-60)))keys.add(k);}
-  if(showPast)for(let i=1;i<=7;i++)keys.add(addDays(today,-i));
-  const ks=[...keys].sort();
-  host.innerHTML='<button type="button" class="btn v113-more" data-v113past="1">'+(showPast?'കഴിഞ്ഞ തീയതികൾ മറയ്ക്കുക':'← കഴിഞ്ഞ തീയതികൾ കാണിക്കുക')+'</button>'+
+  if(!vm){const t=dOf(today);vm={y:t.getFullYear(),m:t.getMonth()};}
+  const tNow=dOf(today);
+  const mCount=(y,m)=>{let n=0;const pre=y+'-'+String(m+1).padStart(2,'0')+'-';for(const [k,l] of byDay)if(k.startsWith(pre))n+=l.filter(e=>e.status!=='cancelled').length;return n;};
+  const months=Array.from({length:12},(_,m)=>{const n=mCount(vm.y,m);return '<button type="button" class="v114-mo'+(m===vm.m?' on':'')+(vm.y===tNow.getFullYear()&&m===tNow.getMonth()?' cur':'')+'" data-v114m="'+m+'">'+E(new Date(vm.y,m,1).toLocaleDateString('en-IN',{month:'short'}))+'<span class="n">'+(n||'')+'</span></button>';}).join('');
+  const last=new Date(vm.y,vm.m+1,0).getDate(),ks=[];
+  for(let d=1;d<=last;d++)ks.push(vm.y+'-'+String(vm.m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0'));
+  host.innerHTML='<div class="v114-yr"><button type="button" class="btn" data-v114y="-1">‹</button><span>'+vm.y+'</span><button type="button" class="btn" data-v114y="1">›</button></div>'+
+   '<div class="v114-months">'+months+'</div>'+
    '<div class="v113-grid">'+ks.map(k=>box(k,byDay.get(k)||[],today)).join('')+'</div>';
  };
  document.addEventListener('click',e=>{
   const b=e.target.closest('[data-v113]');if(b){openDay=b.getAttribute('data-v113');window.renderAppointments();const c=$('apptAllCard');if(c)c.scrollIntoView({block:'start'});return;}
   if(e.target.closest('[data-v113back]')){openDay=null;window.renderAppointments();return;}
-  if(e.target.closest('[data-v113past]')){showPast=!showPast;window.renderAppointments();}
+  const mo=e.target.closest('[data-v114m]');if(mo){vm.m=Number(mo.getAttribute('data-v114m'));window.renderAppointments();return;}
+  const yr=e.target.closest('[data-v114y]');if(yr){vm.y+=Number(yr.getAttribute('data-v114y'));window.renderAppointments();return;}
  });
  // reopening the Diary tab starts at the date list
- const av=window.apptView;if(typeof av==='function')window.apptView=function(v){if(v==='all')openDay=null;return av.apply(this,arguments);};
+ const av=window.apptView;if(typeof av==='function')window.apptView=function(v){if(v==='all'){openDay=null;vm=null;}return av.apply(this,arguments);};
  try{const c=$('apptAllCard');if(c&&getComputedStyle(c).display!=='none')window.renderAppointments();}catch(_){}
 })();
 </script>
