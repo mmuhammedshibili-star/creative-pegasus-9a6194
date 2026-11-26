@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/>
-<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0b3d2b"><title>MISRIYYA HEALTH CARE — V121 Bill sent tick + compact buttons</title>
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0b3d2b"><title>MISRIYYA HEALTH CARE — V122 Tables with lines and bold headers</title>
 <style>
 .nav-burger{flex-shrink:0;width:42px;height:42px;border:1px solid var(--line);background:#fff;border-radius:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:0}
 .nav-burger span{display:block;width:20px;height:2.5px;border-radius:2px;background:var(--ink)}
@@ -435,7 +435,7 @@
 <div id="msCMsg" style="margin-top:6px;font-weight:700"></div></div>
 
 <div id="msMsg" style="margin-top:8px;font-weight:700"></div></div>
-<div class="card" style="margin-top:14px"><h3 style="margin:0 0 8px">ഇന്നത്തെ medicine sales</h3><div class="tablewrap"><table><thead><tr><th>Time</th><th>Customer</th><th>Medicines</th><th>Total</th><th>Received</th><th></th></tr></thead><tbody id="msToday"></tbody></table></div></div><div class="card owner-only" id="v141MsStaffCard" style="margin-top:14px"><h3 style="margin:0 0 8px">Staff തിരിച്ചുള്ള Medicine sale</h3><div class="row two" style="align-items:end"><div><label for="v141MsFrom">From</label><input id="v141MsFrom" type="date"/></div><div><label for="v141MsTo">To</label><input id="v141MsTo" type="date"/></div></div><div id="v141MsStaff" style="margin-top:10px"></div></div></section><section class="tab" id="rxPrint"><div class="rx-paper" id="rxPaper"></div></section><section class="tab" id="billPrint"><div class="bill-paper" id="billPaper"></div></section>
+<div class="card" style="margin-top:14px"><h3 style="margin:0 0 8px">ഇന്നത്തെ medicine sales</h3><div class="tablewrap"><table><thead><tr><th>Time</th><th>Customer</th><th>Medicines</th><th style="text-align:right">Total</th><th></th></tr></thead><tbody id="msToday"></tbody></table></div></div><div class="card owner-only" id="v141MsStaffCard" style="margin-top:14px"><h3 style="margin:0 0 8px">Staff തിരിച്ചുള്ള Medicine sale</h3><div class="row two" style="align-items:end"><div><label for="v141MsFrom">From</label><input id="v141MsFrom" type="date"/></div><div><label for="v141MsTo">To</label><input id="v141MsTo" type="date"/></div></div><div id="v141MsStaff" style="margin-top:10px"></div></div></section><section class="tab" id="rxPrint"><div class="rx-paper" id="rxPaper"></div></section><section class="tab" id="billPrint"><div class="bill-paper" id="billPaper"></div></section>
 </main>
 <script>
 /* V109 storage guard: browser storage (localStorage) holds ~5 million characters per site.
@@ -3713,7 +3713,7 @@ details.kebab .kmenu{position:absolute;right:0;top:100%;z-index:50;background:#f
  function renderToday(){
   const tb=$('msToday');if(!tb)return;const day=localDateKey(new Date());
   const arr=(data.bills||[]).filter(b=>b.saleOnly&&localDateKey(b.date)===day).sort((a,b)=>new Date(b.date)-new Date(a.date));
-  tb.innerHTML=arr.map(b=>'<tr><td>'+esc(new Date(b.date).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}))+'</td><td>'+esc(b.name||'')+(window.v140EditBadge?window.v140EditBadge(b):'')+'</td><td>'+esc((b.items||[]).map(r=>r.name+' × '+r.qty).join(', '))+'</td><td>'+money(savedBillTotal(b))+'</td><td>'+money(totalPaid(b))+'</td><td style="white-space:nowrap"><details class="kebab"><summary aria-label="More">⋮</summary><div class="kmenu"><button class="btn" type="button" onclick="msalePrintId(\''+esc(String(b.id))+'\',\'bill\')">Bill</button><button class="btn" type="button" onclick="msalePrintId(\''+esc(String(b.id))+'\',\'rx\')">Rx</button>'+((b.kind==='fee'||b.newCase)?'':'<button class="btn" type="button" onclick="msaleEditStart(\''+esc(String(b.id))+'\')">✏ Edit</button>')+(window.misriyyaRole==='owner'?'<button class="btn" type="button" onclick="ownerDeleteBill(\''+esc(String(b.id))+'\');setTimeout(function(){window.msaleRender&&window.msaleRender()},400)">Delete</button>':'')+'</div></details></td></tr>').join('')||'<tr><td colspan="6" class="muted">ഇന്ന് medicine sale ഒന്നും ഇല്ല.</td></tr>';
+  tb.innerHTML=arr.map(b=>'<tr><td style="width:1%">'+esc(new Date(b.date).toLocaleTimeString('en-IN',{hour:'numeric',minute:'2-digit'}))+'</td><td>'+esc(b.name||'')+(window.v140EditBadge?window.v140EditBadge(b):'')+'</td><td style="min-width:88px">'+esc((b.items||[]).map(r=>r.name+' × '+r.qty).join(', '))+'</td><td style="white-space:nowrap;text-align:right;font-weight:700">'+money(savedBillTotal(b)).replace(/\.00$/,'')+(Math.abs(totalPaid(b)-savedBillTotal(b))<0.01?'':'<div style="font-size:11px;font-weight:700;color:#b42318">കിട്ടിയത് '+money(totalPaid(b)).replace(/\.00$/,'')+'</div>')+'</td><td style="white-space:nowrap"><details class="kebab"><summary aria-label="More">⋮</summary><div class="kmenu"><button class="btn" type="button" onclick="msalePrintId(\''+esc(String(b.id))+'\',\'bill\')">Bill</button><button class="btn" type="button" onclick="msalePrintId(\''+esc(String(b.id))+'\',\'rx\')">Rx</button>'+((b.kind==='fee'||b.newCase)?'':'<button class="btn" type="button" onclick="msaleEditStart(\''+esc(String(b.id))+'\')">✏ Edit</button>')+(window.misriyyaRole==='owner'?'<button class="btn" type="button" onclick="ownerDeleteBill(\''+esc(String(b.id))+'\');setTimeout(function(){window.msaleRender&&window.msaleRender()},400)">Delete</button>':'')+'</div></details></td></tr>').join('')||'<tr><td colspan="6" class="muted">ഇന്ന് medicine sale ഒന്നും ഇല്ല.</td></tr>';
   const sum=arr.reduce((a,b)=>a+savedBillTotal(b),0);
  }
 
@@ -5509,7 +5509,7 @@ details.v140-hist li{margin-bottom:6px}
 <script>
 /* V116: tells the user when a newer version is published (checks a tiny version.json on GitHub Pages — not Supabase). */
 (function(){
- const APP_VER='121';
+ const APP_VER='122';
  let latest=null;
  async function check(){
   try{
@@ -5549,4 +5549,25 @@ details.v140-hist li{margin-bottom:6px}
 })();
 </script>
 
+<style>
+/* V122: every on-screen list/table gets clear lines and a bold header (print layouts unchanged) */
+@media screen{
+ table:not(#z){border-collapse:separate;border-spacing:0;border:1px solid #cfdcd5;border-radius:12px;overflow:hidden;background:#fff;width:100%}
+ table:not(#z) th{background:#e8f2ec;color:#0b3d27;font-weight:800;font-size:13px;text-transform:none;letter-spacing:0;padding:9px 8px;border-bottom:2px solid #b7d1c3;border-right:1px solid #d6e4dc;text-align:left;vertical-align:bottom;white-space:nowrap}
+ table:not(#z) td{padding:8px;font-size:13.5px;line-height:1.35;border-bottom:1px solid #e3ebe6;border-right:1px solid #edf2ef;vertical-align:top}
+ table:not(#z) th:last-child,table:not(#z) td:last-child{border-right:0}
+ table:not(#z) tbody tr:last-child td{border-bottom:0}
+ table:not(#z) tbody tr:nth-child(even) td{background:#f8fbf9}
+ table:not(#z) td:has(> .btn),table:not(#z) td:has(> button){white-space:nowrap}
+ .tablewrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:12px}
+ details.kebab>summary{list-style:none}
+ details.kebab>summary::-webkit-details-marker{display:none}
+ details.kebab>summary::marker{content:''}
+}
+@media screen and (max-width:640px){
+ table:not(#z) th{font-size:12px;padding:8px 6px}
+ table:not(#z) td{font-size:12.5px;padding:7px 5px}
+ #msToday td:last-child{padding:4px 2px}
+}
+</style>
 </body></html>
