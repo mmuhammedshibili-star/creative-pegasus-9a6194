@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/>
-<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0b3d2b"><title>MISRIYYA HEALTH CARE — V120 Paid online bills locked for staff</title>
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0b3d2b"><title>MISRIYYA HEALTH CARE — V121 Bill sent tick + compact buttons</title>
 <style>
 .nav-burger{flex-shrink:0;width:42px;height:42px;border:1px solid var(--line);background:#fff;border-radius:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:0}
 .nav-burger span{display:block;width:20px;height:2.5px;border-radius:2px;background:var(--ink)}
@@ -195,6 +195,12 @@
 .online-toggle small{display:block;font-weight:600;font-size:11px;color:#5b6b64;margin-top:2px}
 .online-toggle.on{background:#16834a;border-color:#16834a;color:#fff}
 .online-toggle.on small{color:#e3f6ea}
+.online-actions.v121-sm{gap:6px;margin-top:10px}
+.online-actions.v121-sm .online-toggle{min-width:0;flex:1 1 0;padding:7px 6px;font-size:13px;border-width:1.5px;border-radius:10px}
+.online-actions.v121-sm .online-toggle small{font-size:10px}
+.online-actions.v121-pr{gap:6px;margin-top:8px}
+.online-actions.v121-pr .btn{flex:1 1 0;min-width:0;padding:6px 6px;font-size:12.5px;border-radius:9px}
+.online-toggle.sent.on{background:#2563eb;border-color:#2563eb}
 .online-toggle:disabled{opacity:.6;cursor:progress}
 @media(min-width:601px){.staff-dashboard-minimal .staff-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @page{size:A5;margin:6mm 6mm 15mm 6mm}
@@ -2797,7 +2803,7 @@ details.kebab .kmenu{position:absolute;right:0;top:100%;z-index:50;background:#f
         '<div class="dispenser-card-head"><div class="dispenser-patient"><h3>'+de(b.name||'Patient name not recorded')+'</h3>'+(String(b.phone||'').trim()?'<div class="dispenser-patient-meta">'+de(String(b.phone).trim())+(window.v149Wa?window.v149Wa(b.phone):'')+'</div>':'')+(window.v140EditBadge?window.v140EditBadge(b):'')+'</div>'+completeControl+'</div>'+
         '<div class="dispenser-panel" style="margin-bottom:10px">'+rawRx+'</div>'+
         '<div class="dispenser-money-grid"><div class="dispenser-money"><span>Bill amount</span><strong>'+fmt(total)+'</strong></div><div class="dispenser-money"><span>Total collected</span><strong data-dispenser-collected-preview="'+de(id)+'">'+fmt(paid)+'</strong></div><div class="dispenser-money balance '+(Math.abs(balance)<0.01?'zero':'')+'"><span>Balance (Collected − Bill)</span><strong data-dispenser-balance-preview="'+de(id)+'">'+sfmt(balance)+'</strong></div></div>'+(window.v140DiscLine?window.v140DiscLine(b):'')+
-        '<div class="dispenser-panel dispenser-simple-payment">'+payBanner(b,id,ps,locked,isEdit)+'<div style="display:'+(locked?'none':'block')+'"><label for="dispenserCash_'+de(id)+'">'+(isEdit?'Cash — ആകെ (₹)':'Cash received (₹)')+'</label><input id="dispenserCash_'+de(id)+'" class="dispenser-payment-amount" data-dispenser-amount="'+de(id)+'" data-method="cash" type="number" min="0" step="0.01" inputmode="decimal" placeholder="Cash amount"'+(isEdit?' value="'+ps.cash+'"':'')+'><label for="dispenserGpay_'+de(id)+'">'+(isEdit?'Google Pay — ആകെ (₹)':'Google Pay received (₹)')+'</label><input id="dispenserGpay_'+de(id)+'" class="dispenser-payment-amount" data-dispenser-amount="'+de(id)+'" data-method="googlepay" type="number" min="0" step="0.01" inputmode="decimal" placeholder="Google Pay amount"'+(isEdit?' value="'+ps.gpay+'"':'')+'></div><div class="dispenser-money balance '+(Math.abs(balance)<0.01?'zero':'')+'" style="margin-top:10px"><span>Balance (Collected − Bill)</span><strong data-dispenser-balance-preview="'+de(id)+'">'+sfmt(balance)+'</strong></div><div class="dispenser-payment-actions" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">'+payButtons(id,locked,isEdit)+'<button type="button" class="btn" style="flex:1;min-width:110px" data-dispenser-action="print-bill" data-bill-id="'+de(id)+'">Print bill</button><button type="button" class="btn" style="flex:1;min-width:140px" data-dispenser-action="print-rx" data-bill-id="'+de(id)+'">Print prescription</button>'+(window.misriyyaRole==='owner'?'<button type="button" class="btn" style="flex:1;min-width:110px;color:#b42318;border-color:#f1aaaa" data-dispenser-action="owner-delete" data-bill-id="'+de(id)+'">🗑 Delete bill</button>':'')+'</button></div></div>'+(selected?'<div class="dispenser-by">Dispensed by '+de(selected)+'</div>':'')+'</article>';
+        '<div class="dispenser-panel dispenser-simple-payment">'+payBanner(b,id,ps,locked,isEdit)+'<div style="display:'+(locked?'none':'block')+'"><label for="dispenserCash_'+de(id)+'">'+(isEdit?'Cash — ആകെ (₹)':'Cash received (₹)')+'</label><input id="dispenserCash_'+de(id)+'" class="dispenser-payment-amount" data-dispenser-amount="'+de(id)+'" data-method="cash" type="number" min="0" step="0.01" inputmode="decimal" placeholder="Cash amount"'+(isEdit?' value="'+ps.cash+'"':'')+'><label for="dispenserGpay_'+de(id)+'">'+(isEdit?'Google Pay — ആകെ (₹)':'Google Pay received (₹)')+'</label><input id="dispenserGpay_'+de(id)+'" class="dispenser-payment-amount" data-dispenser-amount="'+de(id)+'" data-method="googlepay" type="number" min="0" step="0.01" inputmode="decimal" placeholder="Google Pay amount"'+(isEdit?' value="'+ps.gpay+'"':'')+'></div><div class="dispenser-money balance '+(Math.abs(balance)<0.01?'zero':'')+'" style="margin-top:10px"><span>Balance (Collected − Bill)</span><strong data-dispenser-balance-preview="'+de(id)+'">'+sfmt(balance)+'</strong></div><div class="dispenser-payment-actions" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">'+payButtons(id,locked,isEdit)+'</div><div class="online-actions v121-pr"><button type="button" class="btn" data-dispenser-action="print-bill" data-bill-id="'+de(id)+'">🖨 Bill</button><button type="button" class="btn" data-dispenser-action="print-rx" data-bill-id="'+de(id)+'">🖨 Prescription</button>'+(window.misriyyaRole==='owner'?'<button type="button" class="btn" style="color:#b42318;border-color:#f1aaaa" data-dispenser-action="owner-delete" data-bill-id="'+de(id)+'">🗑 Delete</button>':'')+'</div></div>'+(selected?'<div class="dispenser-by">Dispensed by '+de(selected)+'</div>':'')+'</article>';
     }).join('');
     Object.entries(savedAmounts).forEach(([key,value])=>{const parts=key.split('|');const input=el.querySelector('[data-dispenser-amount="'+parts[0].replace(/"/g,'')+'"][data-method="'+(parts[1]||'cash')+'"]');if(input)input.value=value;});
     if(activeId){const next=document.getElementById(activeId);if(next){next.focus({preventScroll:true});if(activeStart!==null&&activeEnd!==null&&typeof next.setSelectionRange==='function'){try{next.setSelectionRange(activeStart,activeEnd);}catch(_){}}}}
@@ -3022,8 +3028,8 @@ details.kebab .kmenu{position:absolute;right:0;top:100%;z-index:50;background:#f
         '<div class="dispenser-panel" style="margin-bottom:10px"><h4>Prescription</h4><div class="dispenser-prescription-raw"><pre>'+rawRx+'</pre></div></div>'+
         '<div class="dispenser-money-grid" style="grid-template-columns:1fr"><div class="dispenser-money"><span>Bill amount</span><div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap"><strong>'+fmt(moneyTotal(b))+'</strong><small style="color:#667781;font-size:12px">Medicine '+fmt(Math.max(0,moneyTotal(b)-Number(b.courier||0)))+' · Courier '+fmt(Number(b.courier||0))+'</small></div></div></div>'+(window.v140DiscLine?window.v140DiscLine(b):'')+(window.v141CourierTag?window.v141CourierTag(b):'')+
         '<div class="online-extra" style="margin-top:12px;border:1px solid #cfd9d3;border-radius:12px;padding:10px;background:#f9fcfa">'+onlineMoneyBlock(b,id)+'</div>'+
-        '<div class="online-actions">'+tog('billed','Payment done',!!o.billed,o.billedBy,o.billedAt)+tog('packaging','Move to packaging',inPkg(b),o.packagingBy,o.packagingAt)+'</div>'+
-        '<div class="online-actions"><button type="button" class="btn" style="flex:1;min-width:130px" data-online-action="print-bill" data-bill-id="'+de(id)+'">Print bill</button><button type="button" class="btn" style="flex:1;min-width:150px" data-online-action="print-rx" data-bill-id="'+de(id)+'">Print prescription</button>'+(window.misriyyaRole==='owner'?'<button type="button" class="btn" style="flex:1;min-width:110px;color:#b42318;border-color:#f1aaaa" data-online-action="owner-delete" data-bill-id="'+de(id)+'">🗑 Delete bill</button>':'')+'</div>'+
+        '<div class="online-actions v121-sm">'+tog('sent','Bill sent',!!o.billSent,o.billSentBy,o.billSentAt).replace('class="online-toggle','class="online-toggle sent')+tog('billed','Payment done',!!o.billed,o.billedBy,o.billedAt)+tog('packaging','Move to packaging',inPkg(b),o.packagingBy,o.packagingAt)+'</div>'+
+        '<div class="online-actions v121-pr"><button type="button" class="btn" data-online-action="print-bill" data-bill-id="'+de(id)+'">🖨 Bill</button><button type="button" class="btn" data-online-action="print-rx" data-bill-id="'+de(id)+'">🖨 Prescription</button>'+(window.misriyyaRole==='owner'?'<button type="button" class="btn" style="color:#b42318;border-color:#f1aaaa" data-online-action="owner-delete" data-bill-id="'+de(id)+'">🗑 Delete</button>':'')+'</div>'+
       '</article>';
     }).join('');
   };
@@ -3134,7 +3140,7 @@ details.kebab .kmenu{position:absolute;right:0;top:100%;z-index:50;background:#f
     onlineBusy=true;document.querySelectorAll('#onlineQueueList [data-online-action],#pkgList button').forEach(x=>x.disabled=true);
     const who=window.misriyyaRole==='owner'?'Owner':((window.misriyyaStaff&&window.misriyyaStaff.name)||'Staff');
     const when=new Date().toISOString();
-    const label=({billed:'Payment done',packaging:'Move to packaging',packed:'Packed',courier:'Sent'})[field]||field;
+    const label=({sent:'Bill sent',billed:'Payment done',packaging:'Move to packaging',packed:'Packed',courier:'Sent'})[field]||field;
     try{
       let saved=false,serverErr=null;
       try{await rawRequest({action:'update',operation:'online_status',billId:safe,field,value:!!value,by:who});saved=true;}
@@ -3144,7 +3150,7 @@ details.kebab .kmenu{position:absolute;right:0;top:100%;z-index:50;background:#f
           const lb=data.bills.find(x=>onlyId(x.id)===safe);
           if(!lb)throw serverErr||new Error('Bill not found');
           const o={...(lb.online&&typeof lb.online==='object'?lb.online:{})};
-          if(field==='billed'){o.billed=!!value;o.billedBy=value?who:'';o.billedAt=value?when:'';}else if(field==='packaging'){o.packaging=!!value;o.packagingBy=value?who:'';o.packagingAt=value?when:'';}else if(field==='packed'){o.packed=!!value;o.packedBy=value?who:'';o.packedAt=value?when:'';}else{o.courierSent=!!value;o.courierBy=value?who:'';o.courierAt=value?when:'';}
+          if(field==='sent'){o.billSent=!!value;o.billSentBy=value?who:'';o.billSentAt=value?when:'';}else if(field==='billed'){o.billed=!!value;o.billedBy=value?who:'';o.billedAt=value?when:'';}else if(field==='packaging'){o.packaging=!!value;o.packagingBy=value?who:'';o.packagingAt=value?when:'';}else if(field==='packed'){o.packed=!!value;o.packedBy=value?who:'';o.packedAt=value?when:'';}else{o.courierSent=!!value;o.courierBy=value?who:'';o.courierAt=value?when:'';}
           lb.online=o;
           if(typeof save==='function')save();
           const r=window.pushClinicNow?await window.pushClinicNow():{ok:false,reason:'Cloud sync ലഭ്യമല്ല'};
@@ -3360,6 +3366,12 @@ details.kebab .kmenu{position:absolute;right:0;top:100%;z-index:50;background:#f
       if(a==='pay-online'){event.preventDefault();await onlinePay(id);return;}
       if(a==='add-fee'){event.preventDefault();await onlineAddFee(id);return;}
       if(a==='editpay'){event.preventDefault();await onlineEditPay(id);return;}
+      if(a==='sent'){
+        const b=(window.dispenserBillsView||[]).find(x=>onlyId(x.id)===onlyId(id));if(!b)return;
+        const on=!!onlineState(b).billSent;
+        if(on&&!confirm('Bill sent ടിക്ക് മാറ്റണോ?'))return;
+        await setOnlineStatus(id,'sent',!on);return;
+      }
       if(a==='billed'||a==='packaging'){
         const b=(window.dispenserBillsView||[]).find(x=>onlyId(x.id)===onlyId(id));if(!b)return;
         const o=onlineState(b),on=a==='billed'?!!o.billed:inPkg(b);
@@ -4104,7 +4116,7 @@ window.addFeeRecord=function(info){
     }
     if(kind==='online'){
       const pk=o.packaging||o.courierSent;
-      return (o.billed?'<b>✓ Payment done</b>':'<i>Payment pending</i>')+(pk?' · In packaging':'')+(b.date?' · '+esc2(fmtT(b.date)):'');
+      return (o.billSent&&!o.billed?'<b style="color:#2563eb">✓ Bill sent</b> · ':'')+(o.billed?'<b>✓ Payment done</b>':'<i>Payment pending</i>')+(pk?' · In packaging':'')+(b.date?' · '+esc2(fmtT(b.date)):'');
     }
     if(o.courierSent)return '<b>✓✓ Sent '+esc2(fmtT(o.courierAt))+'</b>';
     if(o.packed)return '<b>✓ Packed '+esc2(fmtT(o.packedAt))+'</b>'+(o.address?'':' · <i>address missing</i>');
@@ -5497,7 +5509,7 @@ details.v140-hist li{margin-bottom:6px}
 <script>
 /* V116: tells the user when a newer version is published (checks a tiny version.json on GitHub Pages — not Supabase). */
 (function(){
- const APP_VER='120';
+ const APP_VER='121';
  let latest=null;
  async function check(){
   try{
