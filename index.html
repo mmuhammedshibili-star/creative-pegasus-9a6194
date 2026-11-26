@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/>
-<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0b3d2b"><title>MISRIYYA HEALTH CARE — V119 Update popup</title>
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0b3d2b"><title>MISRIYYA HEALTH CARE — V120 Paid online bills locked for staff</title>
 <style>
 .nav-burger{flex-shrink:0;width:42px;height:42px;border:1px solid var(--line);background:#fff;border-radius:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:0}
 .nav-burger span{display:block;width:20px;height:2.5px;border-radius:2px;background:var(--ink)}
@@ -3041,8 +3041,12 @@ details.kebab .kmenu{position:absolute;right:0;top:100%;z-index:50;background:#f
     const total=moneyTotal(b),paid=paidOn(b),bal=total-paid,fees=feesFor(id);
     const idA=de(id);
     const feeLine=fees.length?fees.map(f=>'<div style="color:#166534;font-weight:700">✓ Fee '+fmt(f.total)+' ചേർത്തു ('+methodLabel((f.payments&&f.payments[0]&&f.payments[0].method)||'')+')</div>').join(''):'<div style="color:#b42318;font-weight:700">Fee ചേർത്തിട്ടില്ല</div>';
-    return '<div style="font-weight:800;margin-bottom:6px">വാങ്ങിയ തുക: '+fmt(paid)+(bal>0.005?' · ബാക്കി '+fmt(bal):'')+'</div>'
-     +((onlineState(b).billed&&paid>0.005)?'<div class="muted" style="font-size:12px">Payment done ✓ — തുക മാറ്റണമെങ്കിൽ മുകളിലെ ⋮ → “Payment തിരുത്തുക”</div>':'<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end"><div style="flex:1;min-width:110px"><label style="font-size:12px">Amount received (₹)</label><input type="number" min="0" step="0.01" inputmode="decimal" data-oi="recv" data-bill-id="'+idA+'"></div><div style="min-width:104px"><label style="font-size:12px">Payment</label><select data-oi="recvmode" data-bill-id="'+idA+'"><option value="googlepay">Google Pay</option><option value="cash">Cash</option></select></div><button type="button" class="btn primary" data-online-action="pay-online" data-bill-id="'+idA+'">Save amount</button></div>')
+    const fullyPaid=paid>0.005&&bal<=0.009;
+    let paidLine='';
+    if(fullyPaid){const ps=(Array.isArray(b&&b.payments)?b.payments:[]).filter(p=>Number(p&&p.amount)>0);const lp=ps[ps.length-1]||{};let dt='';try{dt=lp.date?new Date(lp.date).toLocaleDateString('en-IN',{day:'numeric',month:'short'}):'';}catch(_){}
+     paidLine='<div style="background:#e7f6ec;border:1px solid #a6dfb8;color:#087443;border-radius:12px;padding:10px 12px;font-weight:800;font-size:16px;margin-bottom:6px">✓ '+fmt(paid)+' അടച്ചു'+(dt?' · '+dt:'')+(lp.method?' · '+methodLabel(lp.method):'')+'</div>';}
+    return (fullyPaid?paidLine:'<div style="font-weight:800;margin-bottom:6px">വാങ്ങിയ തുക: '+fmt(paid)+(bal>0.005?' · ബാക്കി '+fmt(bal):'')+'</div>')
+     +(fullyPaid?'<div class="muted" style="font-size:12px">തുക മാറ്റണമെങ്കിൽ ⋮ → “Payment തിരുത്തുക”</div>':(onlineState(b).billed&&paid>0.005)?'<div class="muted" style="font-size:12px">Payment done ✓ — തുക മാറ്റണമെങ്കിൽ മുകളിലെ ⋮ → “Payment തിരുത്തുക”</div>':'<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end"><div style="flex:1;min-width:110px"><label style="font-size:12px">Amount received (₹)</label><input type="number" min="0" step="0.01" inputmode="decimal" data-oi="recv" data-bill-id="'+idA+'"></div><div style="min-width:104px"><label style="font-size:12px">Payment</label><select data-oi="recvmode" data-bill-id="'+idA+'"><option value="googlepay">Google Pay</option><option value="cash">Cash</option></select></div><button type="button" class="btn primary" data-online-action="pay-online" data-bill-id="'+idA+'">Save amount</button></div>')
      +'<hr style="border:0;border-top:1px solid #d9e3dd;margin:10px 0">'
      +'<div style="margin-bottom:6px">'+feeLine+'</div>'
      +'<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end"><div style="flex:1;min-width:110px"><label style="font-size:12px">Consultation fee (₹)</label><input type="number" min="0" step="1" inputmode="decimal" data-oi="fee" data-bill-id="'+idA+'"></div><div style="min-width:104px"><label style="font-size:12px">Fee payment</label><select data-oi="feemode" data-bill-id="'+idA+'"><option value="googlepay">Google Pay</option><option value="cash">Cash</option></select></div><button type="button" class="btn primary" data-online-action="add-fee" data-bill-id="'+idA+'">Add fee</button></div>';
@@ -3069,6 +3073,7 @@ details.kebab .kmenu{position:absolute;right:0;top:100%;z-index:50;background:#f
       if(!(amount>0)){alert('വാങ്ങിയ തുക (0-ൽ കൂടുതൽ) എഴുതുക.');return}
       {const bb=(window.dispenserBillsView||[]).find(x=>onlyId(x.id)===bid);
        if(bb){const tot=moneyTotal(bb),paid=paidTotal(bb);
+        if(paid>=tot-0.009&&window.misriyyaRole!=='owner'){alert('ഈ ബിൽ ഇതിനകം പൂർണ്ണമായി അടച്ചതാണ് ('+fmt(paid)+'). വീണ്ടും ചേർക്കാൻ പറ്റില്ല — തുക തെറ്റാണെങ്കിൽ Owner-നോട് പറയുക.');return;}
         if(paid>=tot-0.009){if(!confirm('ഈ ബിൽ ഇതിനകം പൂർണ്ണമായി അടച്ചതാണ് ('+fmt(paid)+' / '+fmt(tot)+'). വീണ്ടും '+fmt(amount)+' ചേർക്കണോ?'))return;force=true;}
         if(paid<tot-0.009&&paid+amount>tot+0.009&&!confirm('ആകെ '+fmt(paid+amount)+' ബിൽ തുകയേക്കാൾ ('+fmt(tot)+') കൂടുതലാകും. എങ്കിലും ചേർക്കണോ?'))return;}
        const k=bid+':'+amount,t0=window.__lastOnlinePay[k]||0;
@@ -5492,7 +5497,7 @@ details.v140-hist li{margin-bottom:6px}
 <script>
 /* V116: tells the user when a newer version is published (checks a tiny version.json on GitHub Pages — not Supabase). */
 (function(){
- const APP_VER='119';
+ const APP_VER='120';
  let latest=null;
  async function check(){
   try{
