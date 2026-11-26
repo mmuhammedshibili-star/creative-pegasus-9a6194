@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/>
-<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0b3d2b"><title>MISRIYYA HEALTH CARE — V117 New case: Mobile under Place, Google Pay default</title>
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0b3d2b"><title>MISRIYYA HEALTH CARE — V118 Fewer background checks (logs/egress)</title>
 <style>
 .nav-burger{flex-shrink:0;width:42px;height:42px;border:1px solid var(--line);background:#fff;border-radius:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:0}
 .nav-burger span{display:block;width:20px;height:2.5px;border-radius:2px;background:var(--ink)}
@@ -2122,7 +2122,7 @@ updateDash();
     cloudAutoRefreshTimer=setInterval(()=>{
       if(document.hidden)return;
       if(role==='owner')checkOwnerCloudUpdates();
-      else if(role==='staff')loadSharedSchedulerForStaff(true);
+      else if(role==='staff'){const t=Date.now();if(t-(window.__v118SchedAt||0)<115000)return;window.__v118SchedAt=t;loadSharedSchedulerForStaff(true);}
     },30000);
   }
   document.addEventListener('visibilitychange',()=>{if(document.hidden)return;
@@ -3513,7 +3513,8 @@ details.kebab .kmenu{position:absolute;right:0;top:100%;z-index:50;background:#f
     }catch(e){toast('ബിൽ Cloud-ൽ സേവ് ആയി, പക്ഷേ Dispenser പരിശോധിക്കാനായില്ല: '+(e.message||''),'error',retry);}
   };
   ensureBadge();ensureTabBadge('online','onlineNavBadge');ensureTabBadge('packaging','pkgNavBadge');setTimeout(refreshDispenserBadge,2500);setTimeout(refreshDispenserBadge,7000);
-  setInterval(refreshDispenserBadge,20000);
+  // V118 (log/egress saver): every 40 s instead of 20 s; not while the app is in the background; not while the Dispenser/Online/Packaging screen is open (it refreshes itself)
+  setInterval(()=>{if(document.hidden||document.querySelector('#dispenser.active,#online.active,#packaging.active'))return;refreshDispenserBadge();},40000);
   window.addEventListener('focus',refreshDispenserBadge);
   document.addEventListener('visibilitychange',()=>{if(!document.hidden){refreshDispenserBadge();try{if(document.querySelector('#dispenser.active,#online.active,#packaging.active'))window.refreshDispenserQueue();}catch(_){}}});
   // ---- New bill bell (staff devices): rings when a bill appears in the Dispenser that this device has not seen yet
@@ -4958,7 +4959,8 @@ details.v140-hist li{margin-bottom:6px}
    if(n){try{save();}catch(_){}try{renderAppointments();}catch(_){}toast('Staff '+n+' appointment പുതുക്കി: '+names.slice(0,3).join(', '));}
   }catch(_){}finally{busy=false;}
  }
- setTimeout(pull,6000);setInterval(pull,45000);
+ window.v118OwnerApptPull=pull;
+ setTimeout(pull,6000);setInterval(pull,120000);
 })();
 </script>
 <script>
@@ -5480,7 +5482,7 @@ details.v140-hist li{margin-bottom:6px}
 <script>
 /* V116: tells the user when a newer version is published (checks a tiny version.json on GitHub Pages — not Supabase). */
 (function(){
- const APP_VER='117';
+ const APP_VER='118';
  let latest=null;
  async function check(){
   try{
@@ -5495,6 +5497,21 @@ details.v140-hist li{margin-bottom:6px}
   setInterval(check,15*60*1000);
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')check();});
  }
+})();
+</script>
+
+<script>
+/* V118: opening Appointments fetches the latest list immediately (max once per 20 s). */
+(function(){
+ let last=0;
+ function refreshAppts(){
+  const t=Date.now();if(t-last<20000)return;last=t;
+  try{
+   if(window.misriyyaRole==='staff'&&window.v151LoadStaff){window.__v118SchedAt=t;window.v151LoadStaff(true);}
+   else if(window.misriyyaRole==='owner'&&window.v118OwnerApptPull)window.v118OwnerApptPull();
+  }catch(_){}
+ }
+ document.addEventListener('click',e=>{const b=e.target.closest('button[data-tab="scheduler"],#apptTabs [data-av]');if(b)setTimeout(refreshAppts,50);});
 })();
 </script>
 
