@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/>
-<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0b3d2b"><title>MISRIYYA HEALTH CARE — V129 Remove target column</title>
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0b3d2b"><title>MISRIYYA HEALTH CARE — V130 Staff incentive settings fix</title>
 <style>
 .nav-burger{flex-shrink:0;width:42px;height:42px;border:1px solid var(--line);background:#fff;border-radius:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:0}
 .nav-burger span{display:block;width:20px;height:2.5px;border-radius:2px;background:var(--ink)}
@@ -2700,7 +2700,7 @@ details.kebab .kmenu{position:absolute;right:0;top:100%;z-index:50;background:#f
         try{const hs=j.hashes||null;const copy=Object.assign({},j);delete copy.hashes;loadCache={sub,rev:Number(j.revision||0),text:JSON.stringify(copy),hashes:hs};result.j=copy;}catch(_){loadCache=null;}
       }
     }else if(body&&body.action==='update'){if(!(loadCache&&loadCache.hashes))loadCache=null;}
-    if(body&&body.action==='load'){applyRemoteMeds(result.j.meds);applyRemoteDeleted(result.j.deleted);}
+    if(body&&body.action==='load'){applyRemoteMeds(result.j.meds);applyRemoteDeleted(result.j.deleted);if(result.j&&result.j.settings&&typeof result.j.settings==='object')clinicSettings=result.j.settings;}
     return result.j;
   }
   // v152: bills the Owner (or another staff) deleted are removed from THIS staff phone as well.
@@ -5511,7 +5511,7 @@ details.v140-hist li{margin-bottom:6px}
 <script>
 /* V116: tells the user when a newer version is published (checks a tiny version.json on GitHub Pages — not Supabase). */
 (function(){
- const APP_VER='129';try{window.misriyyaAppVer=APP_VER;const st=document.getElementById('v127Stamp');if(st)st.textContent='V'+APP_VER;}catch(_){}
+ const APP_VER='130';try{window.misriyyaAppVer=APP_VER;const st=document.getElementById('v127Stamp');if(st)st.textContent='V'+APP_VER;}catch(_){}
  let latest=null;
  async function check(){
   try{
