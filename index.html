@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/>
-<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0b3d2b"><title>MISRIYYA HEALTH CARE — V122 Tables with lines and bold headers</title>
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0b3d2b"><title>MISRIYYA HEALTH CARE — V123 Staff targets and incentive</title>
 <style>
 .nav-burger{flex-shrink:0;width:42px;height:42px;border:1px solid var(--line);background:#fff;border-radius:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:0}
 .nav-burger span{display:block;width:20px;height:2.5px;border-radius:2px;background:var(--ink)}
@@ -2230,7 +2230,7 @@ updateDash();
   };
   function activateProfile(profile){
     window.misriyyaRole=profile.role;
-    window.misriyyaStaff=profile.role==='staff'?{id:profile.user_id,name:profile.display_name,username:profile.username,role:profile.role}:null;
+    window.misriyyaStaff=profile.role==='staff'?{id:profile.user_id,name:profile.display_name,username:profile.username,role:profile.role,salary:Number(profile.monthly_salary||0)}:null;setTimeout(()=>{try{window.v123Refresh&&window.v123Refresh();}catch(_){}},1500);
     document.body.classList.toggle('staff-dashboard-minimal',profile.role==='staff');
     const welcome=document.getElementById('staffWelcomeCard'); if(welcome){welcome.classList.toggle('staff-hidden',profile.role!=='staff');} const wn=document.getElementById('staffWelcomeName'); if(wn)wn.textContent='Welcome, '+(profile.display_name||profile.username||'Staff'); const wi=document.getElementById('staffWelcomeInitial'); if(wi)wi.textContent=String(profile.display_name||profile.username||'S').trim().charAt(0).toUpperCase(); const wm=document.getElementById('staffWelcomeMeta'); if(wm)wm.textContent=(profile.display_name||profile.username||'Staff')+' · '+(profile.username?'@'+profile.username:'Staff account')+' · '+new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'short',year:'numeric'});
     const overlay=document.getElementById('authOverlay'); if(overlay)overlay.style.display='none';
@@ -2369,7 +2369,7 @@ updateDash();
     const el=document.getElementById('staffAccountsList'); if(!el)return;
     el.innerHTML='<p class="muted">Loading staff accounts from Supabase…</p>';
     try{
-      const res=await cloudApi({action:'list_staff'}); cloudStaffCache=res.staff||[];
+      const res=await cloudApi({action:'list_staff'}); cloudStaffCache=res.staff||[];window.v123StaffList=cloudStaffCache;setTimeout(()=>{try{window.v123Refresh&&window.v123Refresh();}catch(_){}},50);
       if(!cloudStaffCache.length){el.innerHTML='<p class="muted">No cloud staff accounts yet. Add the first staff member using the form.</p>';return;}
       el.innerHTML='<div class="tablewrap"><table class="tbl"><thead><tr><th>Name</th><th>Username</th><th>Monthly salary</th><th>Shift</th><th>Status</th><th>Action</th></tr></thead><tbody>'+cloudStaffCache.map(x=>`<tr><td>${esc(x.display_name)}</td><td>${esc(x.username)}</td><td>${money(x.monthly_salary||0)}</td><td>${esc(String(x.shift_start||'').slice(0,5))}–${esc(String(x.shift_end||'').slice(0,5))}</td><td>${x.is_active?'Active':'Disabled'}</td><td><button class="btn" onclick="toggleStaffAccount('${esc(x.user_id)}')">${x.is_active?'Disable':'Enable'}</button> <button class="btn" onclick="resetStaffPassword('${esc(x.user_id)}')">പാസ്‌വേഡ് മാറ്റുക</button></td></tr>`).join('')+'</tbody></table></div>';
     }catch(e){el.innerHTML='<p class="muted">Could not load cloud staff: '+esc(e.message||String(e))+'</p>';}
@@ -2442,7 +2442,7 @@ updateDash();
   async function populateStaffFilter(){
     const select=document.getElementById('attendanceStaffFilter');if(!select)return;
     const current=select.value;
-    const r=await cloudApi({action:'list_staff'});cloudStaffCache=r.staff||[];
+    const r=await cloudApi({action:'list_staff'});cloudStaffCache=r.staff||[];window.v123StaffList=cloudStaffCache;
     select.innerHTML='<option value="">All staff</option>'+cloudStaffCache.map(x=>`<option value="${esc(x.user_id)}">${esc(x.display_name)} (${esc(x.username)})</option>`).join('');
     select.value=cloudStaffCache.some(x=>x.user_id===current)?current:'';
   }
@@ -3438,6 +3438,7 @@ details.kebab .kmenu{position:absolute;right:0;top:100%;z-index:50;background:#f
   }
   window.refreshDispenserBadge=refreshDispenserBadge;
   window.dispenserRemoteBills=()=>remoteBills;
+  window.dispenserClinicSettings=()=>clinicSettings;
   window.dispenserCall=function(body){return rawRequest(body);};
   window.dispenserLoadRemote=async function(){const r=await rawRequest({action:'load'});remoteBills=keepCases(r.bills);try{updateNavBadges();}catch(_){}return remoteBills;};
   function toast(text,kind,retry){
@@ -5509,7 +5510,7 @@ details.v140-hist li{margin-bottom:6px}
 <script>
 /* V116: tells the user when a newer version is published (checks a tiny version.json on GitHub Pages — not Supabase). */
 (function(){
- const APP_VER='122';
+ const APP_VER='123';
  let latest=null;
  async function check(){
   try{
@@ -5570,4 +5571,117 @@ details.v140-hist li{margin-bottom:6px}
  #msToday td:last-child{padding:4px 2px}
 }
 </style>
+<style>
+/* V123 targets & incentive */
+#staffWelcomeInitial,.staff-eyebrow,.staff-live-pill{display:none!important}
+.v123-card{margin-top:12px}
+.v123-card h3{margin:0 0 10px;font-size:17px}
+.v123-bar{height:14px;border-radius:999px;background:#e7efe9;overflow:hidden;margin:8px 0 4px}
+.v123-bar span{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#16834a,#2fb36a);transition:width .4s}
+.v123-bar.done span{background:linear-gradient(90deg,#d97706,#f59e0b)}
+.v123-big{font-size:30px;font-weight:800;color:#0b3d27;line-height:1.1}
+.v123-sub{font-size:13px;color:#5b6b64;font-weight:600}
+.v123-row{display:flex;justify-content:space-between;gap:10px;font-size:14px;padding:6px 0;border-bottom:1px dashed #e1ebe5}
+.v123-row:last-child{border-bottom:0}
+.v123-earn{background:linear-gradient(135deg,#0b5d3b,#16834a);color:#fff;border-radius:16px;padding:14px 16px;margin-top:12px}
+.v123-earn .v123-big{color:#fff}
+.v123-earn .v123-sub{color:#d7efe2}
+.v123-prod{display:grid;grid-template-columns:1fr 110px 40px;gap:8px;align-items:center;margin-bottom:8px}
+.v123-prod select,.v123-prod input{width:100%}
+</style>
+<script>
+/* V123: staff monthly target + incentive (per unit, per product) — Medicine Sale bills created by that staff. No extra Cloud calls:
+   staff devices read the config from the settings they already load; Owner saves it with the normal clinic sync. */
+(function(){
+ const $=id=>document.getElementById(id);
+ const E=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const N=v=>{const x=Number(v);return Number.isFinite(x)?x:0;};
+ const key=s=>String(s||'').trim().toLowerCase();
+ const rs=v=>'₹'+Math.round(N(v)).toLocaleString('en-IN');
+ function cfg(){
+  let c=null;
+  if(window.misriyyaRole==='owner')c=data&&data.settings&&data.settings.incentives;
+  else{try{c=window.dispenserClinicSettings&&window.dispenserClinicSettings().incentives;}catch(_){}}
+  c=(c&&typeof c==='object')?c:{};
+  return {products:Array.isArray(c.products)?c.products.filter(p=>p&&p.name):[],targets:(c.targets&&typeof c.targets==='object')?c.targets:{}};
+ }
+ function bills(){return window.misriyyaRole==='owner'?(data.bills||[]):((window.dispenserRemoteBills&&window.dispenserRemoteBills())||[]);}
+ const monthKey=d=>{const x=new Date(d);return x.getFullYear()+'-'+(x.getMonth()+1);};
+ // units of incentive products sold by one staff (by display name) in a month
+ window.v123Calc=function(staffName,when){
+  const c=cfg(),mk=monthKey(when||new Date()),who=key(staffName);
+  const rate=new Map(c.products.map(p=>[key(p.name),N(p.perUnit)]));
+  const per=new Map();
+  for(const b of bills()){
+   if(!b||!b.saleOnly||b.newCase||b.kind==='fee')continue;
+   if(key(b.createdBy)!==who||monthKey(b.date)!==mk)continue;
+   for(const it of (Array.isArray(b.items)?b.items:[])){const k=key(it&&it.name);if(!rate.has(k))continue;const q=N(it.qty);if(q<=0)continue;per.set(k,(per.get(k)||0)+q);}
+  }
+  const rows=c.products.map(p=>{const q=per.get(key(p.name))||0;return {name:p.name,qty:q,rate:N(p.perUnit),amt:q*N(p.perUnit)};}).filter(r=>r.qty>0);
+  return {units:rows.reduce((s,r)=>s+r.qty,0),incentive:rows.reduce((s,r)=>s+r.amt,0),rows,cfg:c};
+ };
+
+ // ---------- Staff dashboard ----------
+ function staffCard(){
+  if(window.misriyyaRole!=='staff'||!window.misriyyaStaff)return;
+  let el=$('v123StaffTarget');
+  if(!el){const w=$('staffWelcomeCard');if(!w)return;el=document.createElement('div');el.id='v123StaffTarget';el.className='card v123-card';w.insertAdjacentElement('afterend',el);}
+  const st=window.misriyyaStaff,r=window.v123Calc(st.name),target=N(r.cfg.targets[key(st.username)]),salary=N(st.salary);
+  const pct=target>0?Math.min(100,Math.round(r.units/target*100)):0,done=target>0&&r.units>=target;
+  const month=new Date().toLocaleDateString('en-IN',{month:'long'});
+  el.innerHTML='<h3>🎯 '+E(month)+' Target</h3>'+
+   (target>0?'<div class="v123-big">'+r.units+' <span style="font-size:18px;color:#5b6b64">/ '+target+'</span></div><div class="v123-bar'+(done?' done':'')+'"><span style="width:'+pct+'%"></span></div><div class="v123-sub">'+(done?'🎉 Target പൂർത്തിയായി!':'ഇനി '+(target-r.units)+' എണ്ണം കൂടി')+' · '+pct+'%</div>'
+    :'<div class="v123-sub">ഈ മാസത്തേക്ക് target സെറ്റ് ചെയ്തിട്ടില്ല.</div><div class="v123-big" style="margin-top:6px">'+r.units+' <span style="font-size:15px;color:#5b6b64">എണ്ണം വിറ്റു</span></div>')+
+   (r.rows.length?'<div style="margin-top:10px">'+r.rows.map(x=>'<div class="v123-row"><span>'+E(x.name)+' × '+x.qty+'</span><b>'+rs(x.amt)+'</b></div>').join('')+'</div>':'')+
+   '<div class="v123-earn"><div class="v123-sub">Your earnings this month</div><div class="v123-big">'+rs(salary+r.incentive)+'</div><div class="v123-sub" style="margin-top:4px">Salary '+rs(salary)+' + Incentive '+rs(r.incentive)+'</div></div>';
+ }
+
+ // ---------- Owner: Staff Accounts → Targets & Incentive ----------
+ let draft=null;
+ function ownerCard(){
+  if(window.misriyyaRole!=='owner')return;
+  const sec=$('staffaccounts');if(!sec)return;
+  let el=$('v123Owner');
+  if(!el){el=document.createElement('div');el.id='v123Owner';el.className='card';el.style.marginTop='16px';(sec.querySelector('.grid')||sec).appendChild(el);}
+  if(!draft){const c=cfg();draft={products:c.products.map(p=>({name:p.name,perUnit:N(p.perUnit)})),targets:{...c.targets}};}
+  const meds=[...new Set((data.meds||[]).map(m=>String(m&&m.name||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+  const opt=sel=>'<option value="">— product —</option>'+meds.map(n=>'<option'+(key(n)===key(sel)?' selected':'')+'>'+E(n)+'</option>').join('')+(sel&&!meds.some(n=>key(n)===key(sel))?'<option selected>'+E(sel)+'</option>':'');
+  const staff=(window.v123StaffList||[]).filter(s=>s&&s.is_active!==false);
+  el.innerHTML='<h2>🎯 Targets &amp; Incentive</h2>'+
+   '<h3 style="margin:6px 0 8px;font-size:15px">Incentive products (ഒരു എണ്ണത്തിന് ₹)</h3>'+
+   draft.products.map((p,i)=>'<div class="v123-prod"><select data-v123p="'+i+'">'+opt(p.name)+'</select><input type="number" min="0" step="0.5" inputmode="decimal" data-v123r="'+i+'" value="'+E(p.perUnit||'')+'" placeholder="₹"><button type="button" class="btn" data-v123del="'+i+'" aria-label="Remove">✕</button></div>').join('')+
+   '<button type="button" class="btn" id="v123Add">+ Product ചേർക്കുക</button>'+
+   '<h3 style="margin:16px 0 8px;font-size:15px">Monthly target (എണ്ണം) · ഈ മാസം ഇതുവരെ</h3>'+
+   (staff.length?'<div class="tablewrap"><table class="tbl"><thead><tr><th>Staff</th><th>Target</th><th>Sold</th><th style="text-align:right">Incentive</th><th style="text-align:right">Salary + Incentive</th></tr></thead><tbody>'+
+    staff.map(s=>{const r=window.v123Calc(s.display_name);const t=draft.targets[key(s.username)]||'';return '<tr><td><b>'+E(s.display_name)+'</b><div class="muted" style="font-size:11px">@'+E(s.username)+'</div></td><td><input type="number" min="0" step="1" style="width:80px" data-v123t="'+E(key(s.username))+'" value="'+E(t)+'"></td><td>'+r.units+(t?' / '+E(t):'')+'</td><td style="text-align:right;white-space:nowrap">'+rs(r.incentive)+'</td><td style="text-align:right;white-space:nowrap"><b>'+rs(N(s.monthly_salary)+r.incentive)+'</b></td></tr>';}).join('')+'</tbody></table></div>'
+    :'<div class="muted">Staff ലിസ്റ്റ് ലോഡ് ആകുന്നു…</div>')+
+   '<div class="actions" style="margin-top:12px"><button type="button" class="btn primary" id="v123Save">Save</button><span id="v123Msg" style="font-weight:700;margin-left:8px"></span></div>';
+ }
+ document.addEventListener('change',e=>{
+  const t=e.target;if(!draft)return;
+  if(t.matches('[data-v123p]'))draft.products[Number(t.dataset.v123p)].name=t.value;
+  else if(t.matches('[data-v123r]'))draft.products[Number(t.dataset.v123r)].perUnit=N(t.value);
+  else if(t.matches('[data-v123t]')){const v=N(t.value);if(v>0)draft.targets[t.dataset.v123t]=Math.round(v);else delete draft.targets[t.dataset.v123t];}
+ });
+ document.addEventListener('click',async e=>{
+  if(e.target.closest('#v123Add')){draft.products.push({name:'',perUnit:5});ownerCard();return;}
+  const d=e.target.closest('[data-v123del]');if(d){draft.products.splice(Number(d.dataset.v123del),1);ownerCard();return;}
+  if(e.target.closest('#v123Save')){
+   document.querySelectorAll('[data-v123r]').forEach(i=>{draft.products[Number(i.dataset.v123r)].perUnit=N(i.value);});
+   document.querySelectorAll('[data-v123t]').forEach(i=>{const v=N(i.value);if(v>0)draft.targets[i.dataset.v123t]=Math.round(v);else delete draft.targets[i.dataset.v123t];});
+   const products=draft.products.filter(p=>p.name&&N(p.perUnit)>0).map(p=>({name:String(p.name).trim(),perUnit:N(p.perUnit)}));
+   const seen=new Set();for(const p of products){if(seen.has(key(p.name))){alert(p.name+' രണ്ടുതവണ ചേർത്തിട്ടുണ്ട്.');return;}seen.add(key(p.name));}
+   data.settings=data.settings||{};data.settings.incentives={products,targets:{...draft.targets},updatedAt:new Date().toISOString()};
+   draft=null;ownerCard();const msg=t=>{const m=$('v123Msg');if(m)m.textContent=t;};msg('Saving…');
+   try{if(typeof save==='function')save();const r=window.pushClinicNow?await window.pushClinicNow():{ok:true};msg(r&&r.ok===false?('ഈ ഫോണിൽ സേവ് ആയി; Cloud: '+(r.reason||'later')):'✓ Saved · staff ഫോണുകളിൽ ഉടനെ കാണാം');}catch(err){msg('Cloud sync പിന്നീട്: '+(err.message||''));}
+  }
+ });
+ function tick(){try{staffCard();}catch(_){}try{const s=$('staffaccounts');if(s&&s.classList.contains('active'))ownerCard();}catch(_){}}
+ document.addEventListener('click',e=>{if(e.target.closest('button[data-tab="staffaccounts"],button[data-tab="dashboard"]'))setTimeout(()=>{draft=null;tick();},400);});
+ setInterval(()=>{if(!document.hidden&&!(document.activeElement&&document.activeElement.closest&&document.activeElement.closest('#v123Owner')))tick();},20000);
+ setTimeout(tick,3000);
+ window.v123Refresh=tick;
+})();
+</script>
+
 </body></html>
