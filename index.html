@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/>
-<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0b3d2b"><title>MISRIYYA HEALTH CARE — V136 Edit prescription menu</title>
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0b3d2b"><title>MISRIYYA HEALTH CARE — V137 Monthly attendance</title>
 <style>
 .nav-burger{flex-shrink:0;width:42px;height:42px;border:1px solid var(--line);background:#fff;border-radius:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:0}
 .nav-burger span{display:block;width:20px;height:2.5px;border-radius:2px;background:var(--ink)}
@@ -1907,6 +1907,7 @@ updateDash();
     if(!resp.ok || json.ok===false) throw new Error(json.error || json.message || ('Cloud request failed ('+resp.status+')'));
     return json;
   }
+  window.misriyyaAttendanceApi=cloudApi;
   function emailForUsername(username){return String(username||'').trim().toLowerCase()+'@accounts.misriyya.healthcare';}
   function setCloudError(msg){const e=document.getElementById('authError');if(e)e.textContent=msg||'';}
   function setLoginBusy(busy){const b=document.getElementById('cloudLoginBtn');if(b){b.disabled=busy;b.textContent=busy?'Signing in…':'Login securely';}}
@@ -5526,7 +5527,7 @@ details.v140-hist li{margin-bottom:6px}
 <script>
 /* V116: tells the user when a newer version is published (checks a tiny version.json on GitHub Pages — not Supabase). */
 (function(){
- const APP_VER='136';try{window.misriyyaAppVer=APP_VER;const st=document.getElementById('v127Stamp');if(st)st.textContent='V'+APP_VER;}catch(_){}
+ const APP_VER='137';try{window.misriyyaAppVer=APP_VER;const st=document.getElementById('v127Stamp');if(st)st.textContent='V'+APP_VER;}catch(_){}
  let latest=null;
  async function check(){
   try{
@@ -5832,6 +5833,59 @@ document.addEventListener('wheel',function(e){var a=document.activeElement;if(a&
  },true);
  document.addEventListener('keydown',e=>{if(e.key==='Escape')close();});
  setTimeout(watch,1500);setInterval(watch,5000);
+})();
+</script>
+<style>
+/* V137 owner monthly attendance */
+#v137Month{margin-top:16px;border-top:1px solid var(--line);padding-top:14px}
+#v137Month .row137{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;margin-bottom:10px}
+#v137Month table{width:100%;border-collapse:collapse}
+#v137Month th,#v137Month td{border:1px solid #dfe9e3;padding:8px 6px;text-align:center;font-size:14px}
+#v137Month th{background:#eef5f0;font-weight:800}
+#v137Month td:first-child,#v137Month th:first-child{text-align:left}
+#v137Month .p{color:#0b7a3e;font-weight:800}#v137Month .a{color:#b42318;font-weight:800}#v137Month .h{color:#5b6b64;font-weight:700}
+#v137Month .dots{display:flex;flex-wrap:wrap;gap:3px;justify-content:flex-start;margin-top:4px}
+#v137Month .dots i{width:18px;height:18px;border-radius:5px;font-style:normal;font-size:10px;line-height:18px;text-align:center;color:#fff}
+#v137Month .dots i.P{background:#16834a}#v137Month .dots i.L{background:#d97706}#v137Month .dots i.A{background:#dc2626}#v137Month .dots i.H{background:#cbd5d0;color:#374151}#v137Month .dots i.F{background:#f1f5f3;color:#9ca3af}
+</style>
+<script>
+/* V137: Owner monthly attendance — Present / Absent / Holiday per staff.
+   Holiday = Sunday, an added holiday date, or a day when no staff punched at all.
+   Loads only when the Owner taps "കാണിക്കുക" (one small request). Salary is not changed. */
+(function(){
+ const E=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ function panel(){
+  if(window.misriyyaRole!=='owner')return;
+  const card=document.querySelector('#attendance .card.owner-only');if(!card||document.getElementById('v137Month'))return;
+  const now=new Date(),m=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+  card.insertAdjacentHTML('beforeend','<div id="v137Month"><h3>📅 Monthly attendance</h3><div class="row137"><div><label for="v137M">Month</label><input id="v137M" type="month" value="'+m+'"></div><button type="button" class="btn primary" id="v137Go">കാണിക്കുക</button></div><div id="v137Out" class="muted">Month തിരഞ്ഞെടുത്ത് "കാണിക്കുക" അമർത്തുക.</div></div>');
+ }
+ function holidaySet(){const s=(typeof data!=='undefined'&&data&&data.settings&&Array.isArray(data.settings.staffHolidays))?data.settings.staffHolidays:[];return new Set(s.map(String));}
+ async function load(){
+  const out=document.getElementById('v137Out'),m=(document.getElementById('v137M')||{}).value;if(!out||!m)return;
+  out.innerHTML='Loading…';
+  try{
+   const r=await window.misriyyaAttendanceApi({action:'month_summary',month:m});
+   const today=String(r.today||''),[y,mo]=m.split('-').map(Number),last=new Date(y,mo,0).getDate();
+   const recs=r.records||[],byDay=new Map();recs.forEach(x=>{const d=String(x.work_date);if(!byDay.has(d))byDay.set(d,new Map());const k=byDay.get(d);if(!k.has(x.staff_id))k.set(x.staff_id,x);});
+   const extra=holidaySet(),days=[];
+   for(let d=1;d<=last;d++){const ds=m+'-'+String(d).padStart(2,'0');if(today&&ds>today)break;const sun=new Date(ds+'T12:00:00').getDay()===0,nobody=!byDay.has(ds);
+    const isToday=ds===today;days.push({ds,d,hol:(sun||extra.has(ds)||(nobody&&!isToday)),today:isToday,why:sun?'Sunday':extra.has(ds)?'Holiday':'ആരും വന്നില്ല'});}
+   const work=days.filter(x=>!x.hol),hols=days.filter(x=>x.hol).length;
+   const staff=(r.staff||[]).filter(s=>s.is_active!==false||recs.some(x=>x.staff_id===s.user_id));
+   const rows=staff.map(s=>{let P=0,A=0,L=0;const dots=days.map(x=>{const rec=byDay.get(x.ds)&&byDay.get(x.ds).get(s.user_id);
+     if(rec){if(!x.hol)P++;if(rec.is_late)L++;return '<i class="'+(rec.is_late?'L':'P')+'" title="'+x.ds+(rec.is_late?' late':'')+'">'+x.d+'</i>';}
+     if(x.hol)return '<i class="H" title="'+x.ds+' · '+E(x.why)+'">'+x.d+'</i>';
+     if(x.today)return '<i class="F" title="'+x.ds+' · ഇന്ന്">'+x.d+'</i>';
+     A++;return '<i class="A" title="'+x.ds+' · absent">'+x.d+'</i>';}).join('');
+    return '<tr><td><b>'+E(s.display_name)+'</b><div class="dots">'+dots+'</div></td><td class="p">'+P+'</td><td class="a">'+A+'</td><td>'+L+'</td></tr>';}).join('');
+   out.innerHTML='<div class="muted" style="margin-bottom:8px">Working days: <b>'+work.length+'</b> · Holidays: <b>'+hols+'</b> (Sunday, ചേർത്ത holiday, ആരും punch ചെയ്യാത്ത ദിവസം)</div>'+
+    '<div class="tablewrap"><table><thead><tr><th>Staff</th><th>Present</th><th>Absent</th><th>Late</th></tr></thead><tbody>'+(rows||'<tr><td colspan="4">Staff ഇല്ല</td></tr>')+'</tbody></table></div>'+
+    '<div class="muted" style="font-size:12px;margin-top:6px">🟩 Present · 🟧 Late · 🟥 Absent · ⬜ Holiday</div>';
+  }catch(e){out.innerHTML='<span style="color:#b42318">'+E(e.message||String(e))+'</span>';}
+ }
+ document.addEventListener('click',e=>{if(e.target.closest('#v137Go'))load();if(e.target.closest('button[data-tab="attendance"]'))setTimeout(panel,300);});
+ setTimeout(panel,2500);setInterval(panel,10000);
 })();
 </script>
 </body></html>
