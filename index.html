@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/>
-<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0b3d2b"><title>MISRIYYA HEALTH CARE — V125 Incentive slabs</title>
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0b3d2b"><title>MISRIYYA HEALTH CARE — V126 Incentive name matching</title>
 <style>
 .nav-burger{flex-shrink:0;width:42px;height:42px;border:1px solid var(--line);background:#fff;border-radius:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:0}
 .nav-burger span{display:block;width:20px;height:2.5px;border-radius:2px;background:var(--ink)}
@@ -5510,7 +5510,7 @@ details.v140-hist li{margin-bottom:6px}
 <script>
 /* V116: tells the user when a newer version is published (checks a tiny version.json on GitHub Pages — not Supabase). */
 (function(){
- const APP_VER='125';
+ const APP_VER='126';
  let latest=null;
  async function check(){
   try{
@@ -5615,12 +5615,15 @@ body.staff-dashboard-minimal #dashboard > #v123StaffTarget.card:not(#zz1):not(#z
  // units of incentive products sold by one staff (by display name) in a month
  window.v123Calc=function(staffName,when){
   const c=cfg(),mk=monthKey(when||new Date()),who=key(staffName);
-  const rate=new Map(c.products.map(p=>[key(p.name),p]));
+  // names vary on bills ("OMEGA 3 FA 1000 MG", "OMEGA 3 FA 1000", "INFINITY DRIVE TABS") → compare normalised names
+  const nm=s=>String(s||'').toUpperCase().split(/[^A-Z0-9]+/).map(t=>t.replace(/^(\d+)MG$/,'$1')).filter(t=>t&&!/^(MG|TABS?|TABLETS?|CAPS?|CAPSULES?)$/.test(t)).join('');
+  const rate=new Map(c.products.map(p=>[key(p.name),p])),norm=c.products.map(p=>[nm(p.name),key(p.name)]);
+  const match=n=>{const v=nm(n);if(!v)return null;const ex=norm.find(x=>x[0]===v);if(ex)return ex[1];const pre=v.length>=5?norm.filter(x=>x[0].startsWith(v)):[];return pre.length===1?pre[0][1]:null;};
   const per=new Map();
   for(const b of bills()){
    if(!b||!b.saleOnly||b.newCase||b.kind==='fee')continue;
    if(key(b.createdBy)!==who||monthKey(b.date)!==mk)continue;
-   for(const it of (Array.isArray(b.items)?b.items:[])){const k=key(it&&it.name);if(!rate.has(k))continue;const q=N(it.qty);if(q<=0)continue;per.set(k,(per.get(k)||0)+q);}
+   for(const it of (Array.isArray(b.items)?b.items:[])){const k=match(it&&it.name);if(!k||!rate.has(k))continue;const q=N(it.qty);if(q<=0)continue;per.set(k,(per.get(k)||0)+q);}
   }
   // slab: rate of the highest slab crossed applies to ALL units of that product (below first slab = base rate)
   const rows=c.products.map(p=>{const q=per.get(key(p.name))||0;let rt=N(p.perUnit);for(const x of p.slabs)if(q>x.above)rt=x.rate;const nx=p.slabs.find(x=>q<=x.above&&x.rate>rt)||null;return {name:p.name,qty:q,rate:rt,amt:q*rt,next:nx?{need:nx.above+1-q,rate:nx.rate}:null};}).filter(r=>r.qty>0||r.next);
