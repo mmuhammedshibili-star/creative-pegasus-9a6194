@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/>
-<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0b3d2b"><title>MISRIYYA HEALTH CARE — V134 Sales label</title>
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0b3d2b"><title>MISRIYYA HEALTH CARE — V135 Clinic location punch</title>
 <style>
 .nav-burger{flex-shrink:0;width:42px;height:42px;border:1px solid var(--line);background:#fff;border-radius:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:0}
 .nav-burger span{display:block;width:20px;height:2.5px;border-radius:2px;background:var(--ink)}
@@ -260,7 +260,7 @@
 </section>
 <section class="tab" id="rx"><div class="grid"><div class="card"><h2>Prescription Creator <span class="pill">NEW</span></h2><div class="notice">You can paste your existing software text here. Example: <b>A2932 AYY00B</b>, phone number, then numbered medicines.</div><label>Paste from existing software</label><textarea id="pasteRx" placeholder="A2932 AYY00B\n+97336843091\n\n1. MAX L ARG 1-0-1\n2. VIGOR GOLD 0-0-1\n3. SELENIUM 30/4D WEEKLY ONCE"></textarea><div class="actions"><button class="btn primary" onclick="parsePaste('rx')">Extract Patient, Notes &amp; Medicines</button><button class="btn" onclick="clearRx()">Clear</button></div><div id="rxExtractStatus" class="notice" style="display:none;margin-top:10px;line-height:1.6"></div><hr style="border:0;border-top:1px solid var(--line);margin:18px 0"/><div class="row three"><div><label>Patient name</label><input id="rxName"/></div><div><label>Age</label><input id="rxAge" type="number"/></div><div><label>Reg. No.</label><input id="rxReg"/></div></div><div class="row three"><div><label>Phone</label><input id="rxPhone"/></div><div><label>Date</label><input id="rxDate" type="date"/></div><div><label>Consultation charge (₹)</label><input id="rxConsult" min="0" step="1" type="number" value="0"/></div></div><div class="row two"><div><label>Follow-up date (optional)</label><input id="rxFollowup" type="date"/></div><div><label>Diagnosis / Clinical impression</label><input id="rxDiagnosis" placeholder="Diagnosis or clinical impression"/></div></div><div style="margin-top:12px"><label for="rxClinicalNotes">Consultation notes / Patient progress</label><textarea id="rxClinicalNotes" rows="5" placeholder="Write today’s condition, symptoms, response to previous medicines, examination/findings, advice and plan. Example: No improvement; review after current medicines; consider referral/surgery if still not improving."></textarea></div><h3 style="margin-top:18px">Medicines</h3><div id="rxRows"></div><div class="actions"><button class="btn" onclick="addRxRow()">+ Add medicine</button><button class="btn primary" onclick="printPrescription()">Print Prescription</button><button class="btn" onclick="sendRxToBill()">Create Bill from Prescription</button><button class="btn" onclick="saveConsultationOnly()">Save Consultation (no bill)</button></div></div>
 <div class="card"><h3>Medicine lookup</h3><div id="rxPreview"></div></div></div></section>
-<section class="tab" id="bill"><div class="grid"><div class="card"><h2>Medicine Billing</h2><div id="billSaveReminder" class="notice" style="display:none;position:sticky;top:8px;z-index:20;border:2px solid #d97706;background:#fff7ed;color:#7c2d12;font-weight:700">⚠️ This bill has not been saved yet. Please click Save Bill before leaving.</div><label>Paste prescription / patient text</label><textarea id="pasteBill" placeholder="Paste copied text here..."></textarea><div class="actions"><button class="btn primary" onclick="parsePaste('bill')">Generate Bill</button><button class="btn" onclick="clearBill()">Clear</button></div><hr style="border:0;border-top:1px solid var(--line);margin:18px 0"/><div class="row three"><div><label>Patient name</label><input id="bName"/></div><div><label>Age</label><input id="bAge" type="number"/></div><div><label>Reg. No.</label><input id="bReg"/></div></div><div class="row three"><div><label>Phone</label><input id="bPhone"/></div><div><label>Follow-up date (optional)</label><input id="billFollowup" type="date"/></div><div><label>Course duration (days)</label><input id="billDays" min="1" oninput="recalculateBillQuantities()" placeholder="e.g. 15" type="number"/></div><div><label><b>Consultation charge (₹)</b></label><input id="consult" inputmode="decimal" min="0" oninput="renderBill()" step="1" type="number" value="0"/></div><div><label>Courier / delivery (₹)</label><input id="courier" min="0" oninput="window.__autoCourier=false;renderBill()" step="1" type="number" value="0"/></div><div><label>Courier service</label><span id="v140BillCS"></span></div><div><label>Discount type</label><select id="discountType" onchange="renderBill()"><option value="percent">Percentage (%)</option><option value="amount">Fixed amount (₹)</option></select></div><div><label>Discount value</label><input id="discountValue" type="number" min="0" step="0.01" value="0" oninput="renderBill()" placeholder="0"/></div><div><label>Fixed bill amount (₹)</label><input id="fixedBillAmount" type="number" min="0" step="1" inputmode="decimal" oninput="renderBill()" placeholder="₹"/></div></div><div class="notice" id="v146KindBox" style="margin:8px 0;border:2px solid #d97706;background:#fff7ed"><label for="v146Kind" style="font-weight:800">Case type * (നിർബന്ധം)</label><select id="v146Kind" style="width:100%;padding:10px;font-size:16px"><option value="">— തിരഞ്ഞെടുക്കുക —</option><option value="offline">Offline</option><option value="online">Online</option><option value="counselling">Counselling</option></select></div><div class="notice" id="regCaseType" style="display:none;margin:0"></div><h3>Items</h3><div id="billRows"></div><div class="actions"><button class="btn" onclick="addBillRow()">+ Add medicine</button><button class="btn primary" onclick="saveBill()">Save Bill</button><button class="btn" onclick="printBill()">Print Bill</button></div></div><div class="card"><h3>Bill summary</h3><div id="billSummary"></div></div></div></section>
+<section class="tab" id="bill"><div class="grid"><div class="card"><h2>Medicine Billing</h2><div id="billSaveReminder" class="notice" style="display:none;position:sticky;top:8px;z-index:20;border:2px solid #d97706;background:#fff7ed;color:#7c2d12;font-weight:700">⚠️ This bill has not been saved yet. Please click Save Bill before leaving.</div><label>Paste prescription / patient text</label><textarea id="pasteBill" placeholder="Paste copied text here..."></textarea><div class="actions"><button class="btn primary" onclick="parsePaste('bill')">Generate Bill</button><button class="btn" onclick="clearBill()">Clear</button></div><hr style="border:0;border-top:1px solid var(--line);margin:18px 0"/><div class="row three"><div><label>Patient name</label><input id="bName"/></div><div><label>Age</label><input id="bAge" type="number"/></div><div><label>Reg. No.</label><input id="bReg"/></div></div><div class="row three"><div><label>Phone</label><input id="bPhone"/></div><div><label>Follow-up date (optional)</label><input id="billFollowup" type="date"/></div><div><label>Course duration (days)</label><input id="billDays" min="1" oninput="recalculateBillQuantities()" placeholder="e.g. 15" type="number"/></div><div><label><b>Consultation charge (₹)</b></label><input id="consult" inputmode="decimal" min="0" oninput="renderBill()" step="1" type="number" value="0"/></div><div><label>Courier / delivery (₹)</label><input id="courier" min="0" oninput="window.__autoCourier=false;renderBill()" step="1" type="number" value="0"/></div><div><label>Courier service</label><span id="v140BillCS"></span></div><div><label>Discount type</label><select id="discountType" onchange="renderBill()"><option value="percent">Percentage (%)</option><option value="amount">Fixed amount (₹)</option></select></div><div><label>Discount value</label><input id="discountValue" type="number" min="0" step="0.01" value="0" oninput="renderBill()" placeholder="0"/></div><div><label>Fixed bill amount (₹)</label><input id="fixedBillAmount" type="number" min="0" step="1" inputmode="decimal" oninput="renderBill()" placeholder="₹"/></div></div><div id="v146KindBox" style="margin:8px 0;max-width:360px"><label for="v146Kind">Case type</label><select id="v146Kind" style="width:100%"><option value="">— തിരഞ്ഞെടുക്കുക —</option><option value="offline">Offline</option><option value="online">Online</option><option value="counselling">Counselling</option></select></div><div class="notice" id="regCaseType" style="display:none;margin:0"></div><h3>Items</h3><div id="billRows"></div><div class="actions"><button class="btn" onclick="addBillRow()">+ Add medicine</button><button class="btn primary" onclick="saveBill()">Save Bill</button><button class="btn" onclick="printBill()">Print Bill</button></div></div><div class="card"><h3>Bill summary</h3><div id="billSummary"></div></div></div></section>
 <section class="tab" id="reports">
 <div class="card">
 <h2>Collection &amp; Billing Reports</h2>
@@ -453,8 +453,8 @@
       try{return orig.call(this,k,v);}catch(e){
         if(!isQuota(e)||this!==window.localStorage)throw e;
         k=String(k);
-        // an extra copy itself does not get space by deleting other copies — skip it quietly
-        if(EXTRA.indexOf(k)>=0){try{this.removeItem(k);}catch(_){}throw e;}
+        // an extra copy itself does not get space by deleting other copies — skip it quietly (V135: no error; Cloud is the backup)
+        if(EXTRA.indexOf(k)>=0){try{this.removeItem(k);}catch(_){}return;}
         for(var i=0;i<EXTRA.length;i++){
           if(this.getItem(EXTRA[i])===null)continue;
           try{this.removeItem(EXTRA[i]);}catch(_){}
@@ -2466,11 +2466,26 @@ updateDash();
     try{const r=await cloudApi({action:'list_attendance',date:d,staff_id:sid});renderCloudAttendanceTable(r.records||[]);}
     catch(e){el.innerHTML='<p class="muted">Could not load shared records: '+esc(e.message||String(e))+'</p>';}
   };
+  window.v135GetLocation=function(){
+    return new Promise(res=>{
+      if(!navigator.geolocation){res({ok:false,msg:'ഈ ഫോണിൽ Location കിട്ടുന്നില്ല. മറ്റൊരു ഫോണോ ബ്രൗസറോ ഉപയോഗിക്കൂ.'});return;}
+      navigator.geolocation.getCurrentPosition(p=>res({ok:true,lat:p.coords.latitude,lng:p.coords.longitude,acc:Math.round(p.coords.accuracy||0)}),
+        e=>res({ok:false,msg:e&&e.code===1?'📍 Punch ചെയ്യാൻ Location അനുവദിക്കണം.\n\nബ്രൗസറിന്റെ address bar-ലെ 🔒 / site settings → Location → Allow ആക്കി വീണ്ടും ശ്രമിക്കൂ.':'📍 Location കിട്ടിയില്ല. ഫോണിൽ Location (GPS) ഓൺ ആണെന്ന് ഉറപ്പാക്കി വീണ്ടും ശ്രമിക്കൂ.'}),
+        {enableHighAccuracy:true,timeout:20000,maximumAge:20000});
+    });
+  };
   window.punchAttendance=async function(kind){
     if(window.misriyyaRole!=='staff'||!window.misriyyaStaff){alert('Please log in with your own cloud Staff username and password.');return;}
     const btn=document.getElementById(kind==='in'?'punchInBtn':'punchOutBtn');if(btn){btn.disabled=true;btn.textContent=kind==='in'?'Recording Punch In…':'Recording Punch Out…';}
     try{
-      const result=await cloudApi({action:'punch',kind});const row=result.record||{};const time=kind==='in'?row.punch_in_at:row.punch_out_at;
+      // V135: punch only inside the clinic (server checks the distance again)
+      if(btn)btn.textContent='Location എടുക്കുന്നു…';
+      const loc=await window.v135GetLocation();
+      if(!loc.ok){alert(loc.msg);return;}
+      const CL={lat:11.096319,lng:76.065942},R=6371000,rad=x=>x*Math.PI/180;
+      const dLa=rad(loc.lat-CL.lat),dLo=rad(loc.lng-CL.lng),h=Math.sin(dLa/2)**2+Math.cos(rad(CL.lat))*Math.cos(rad(loc.lat))*Math.sin(dLo/2)**2,dist=Math.round(2*R*Math.asin(Math.sqrt(h)));
+      if(Math.max(0,dist-Math.min(loc.acc||0,50))>100){alert('📍 നിങ്ങൾ ഇപ്പോൾ ക്ലിനിക്കിൽ അല്ല (ഏകദേശം '+(dist>=1000?(dist/1000).toFixed(1)+' km':dist+' m')+' അകലെ).\n\nക്ലിനിക്കിന് അകത്ത് പ്രവേശിച്ചിട്ട് Punch '+(kind==='in'?'In':'Out')+' ചെയ്യൂ.');return;}
+      const result=await cloudApi({action:'punch',kind,lat:loc.lat,lng:loc.lng,acc:loc.acc});const row=result.record||{};const time=kind==='in'?row.punch_in_at:row.punch_out_at;
       if(kind==='in' && result.is_late){
         if(result.half_day_notice){alert('Punch In recorded at '+stamp(time)+'.\n\nNOTICE: You have punched in late for 3 consecutive attendance days. As per clinic policy, today will be marked for half-day leave review. Please contact Owner/Admin.');}
         else{alert('Punch In recorded at '+stamp(time)+'.\n\nLATE ARRIVAL WARNING: You are '+result.late_minutes+' minutes late. Punch In is accepted, but if you are late for 3 consecutive attendance days, it will trigger a half-day leave review notification.');}
@@ -5511,7 +5526,7 @@ details.v140-hist li{margin-bottom:6px}
 <script>
 /* V116: tells the user when a newer version is published (checks a tiny version.json on GitHub Pages — not Supabase). */
 (function(){
- const APP_VER='134';try{window.misriyyaAppVer=APP_VER;const st=document.getElementById('v127Stamp');if(st)st.textContent='V'+APP_VER;}catch(_){}
+ const APP_VER='135';try{window.misriyyaAppVer=APP_VER;const st=document.getElementById('v127Stamp');if(st)st.textContent='V'+APP_VER;}catch(_){}
  let latest=null;
  async function check(){
   try{
@@ -5746,5 +5761,9 @@ body.staff-dashboard-minimal #staffWelcomeCard .staff-summary-grid{display:none!
  });
  setTimeout(paint,2500);
 })();
+</script>
+<script>
+/* V135: mouse wheel must not change number boxes (consultation charge, discount, qty…). Wheel just scrolls the page. */
+document.addEventListener('wheel',function(e){var a=document.activeElement;if(a&&a.tagName==='INPUT'&&a.type==='number'&&(e.target===a||a.contains(e.target)))a.blur();},{passive:true,capture:true});
 </script>
 </body></html>
