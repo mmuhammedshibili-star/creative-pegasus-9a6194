@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/>
-<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0b3d2b"><title>MISRIYYA HEALTH CARE — V128 Staff incentive card wording</title>
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0b3d2b"><title>MISRIYYA HEALTH CARE — V129 Remove target column</title>
 <style>
 .nav-burger{flex-shrink:0;width:42px;height:42px;border:1px solid var(--line);background:#fff;border-radius:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:0}
 .nav-burger span{display:block;width:20px;height:2.5px;border-radius:2px;background:var(--ink)}
@@ -5511,7 +5511,7 @@ details.v140-hist li{margin-bottom:6px}
 <script>
 /* V116: tells the user when a newer version is published (checks a tiny version.json on GitHub Pages — not Supabase). */
 (function(){
- const APP_VER='128';try{window.misriyyaAppVer=APP_VER;const st=document.getElementById('v127Stamp');if(st)st.textContent='V'+APP_VER;}catch(_){}
+ const APP_VER='129';try{window.misriyyaAppVer=APP_VER;const st=document.getElementById('v127Stamp');if(st)st.textContent='V'+APP_VER;}catch(_){}
  let latest=null;
  async function check(){
   try{
@@ -5638,7 +5638,7 @@ body.staff-dashboard-minimal #dashboard > #v123StaffTarget.card:not(#zz1):not(#z
   if(!N(window.misriyyaStaff.salary)&&window.v127Me&&window.v127Me.monthly_salary)window.misriyyaStaff.salary=Number(window.v127Me.monthly_salary);
   let el=$('v123StaffTarget');
   if(!el){const w=$('staffWelcomeCard');if(!w)return;el=document.createElement('div');el.id='v123StaffTarget';el.className='card v123-card';w.insertAdjacentElement('afterend',el);}
-  const st=window.misriyyaStaff,r=window.v123Calc(st.name),target=N(r.cfg.targets[key(st.username)]),salary=N(st.salary);
+  const st=window.misriyyaStaff,r=window.v123Calc(st.name),target=0,salary=N(st.salary);
   const pct=target>0?Math.min(100,Math.round(r.units/target*100)):0,done=target>0&&r.units>=target;
   const month=new Date().toLocaleDateString('en-IN',{month:'long'});
   el.innerHTML='<h3>🎯 '+E(month)+(target>0?' Target':' Incentive')+'</h3>'+
@@ -5665,9 +5665,9 @@ body.staff-dashboard-minimal #dashboard > #v123StaffTarget.card:not(#zz1):not(#z
     (p.slabs||[]).map((x,j)=>'<div class="v123-slab"><span>എണ്ണം</span><input type="number" min="1" step="1" inputmode="numeric" data-v123sa="'+i+'_'+j+'" value="'+E(x.above||'')+'" placeholder="200"><span>കടന്നാൽ ₹</span><input type="number" min="0" step="0.5" inputmode="decimal" data-v123sr="'+i+'_'+j+'" value="'+E(x.rate||'')+'" placeholder="7"><button type="button" class="btn" data-v123sdel="'+i+'_'+j+'" aria-label="Remove slab">✕</button></div>').join('')+
     '<button type="button" class="btn" style="font-size:12px;padding:6px 10px" data-v123sadd="'+i+'">+ Slab</button></div>').join('')+
    '<button type="button" class="btn" id="v123Add">+ Product ചേർക്കുക</button>'+
-   '<h3 style="margin:16px 0 4px;font-size:15px">ഈ മാസം ഓരോ സ്റ്റാഫും</h3><div class="v123-sub" style="margin-bottom:8px">Target = സ്റ്റാഫിന് dashboard-ൽ progress bar ആയി കാണാനുള്ള ലക്ഷ്യം മാത്രം (എല്ലാ incentive products-ഉം കൂട്ടി എണ്ണം). Incentive തുക slab അനുസരിച്ചാണ്, target-നെ ആശ്രയിക്കുന്നില്ല. വേണ്ടെങ്കിൽ ഒഴിച്ചിടാം.</div>'+
-   (staff.length?'<div class="tablewrap"><table class="tbl"><thead><tr><th>Staff</th><th>Target<div style="font-size:10px;font-weight:600;color:#5b6b64">ലക്ഷ്യം (എണ്ണം)</div></th><th>Sold</th><th style="text-align:right">Incentive</th><th style="text-align:right">Salary + Incentive</th></tr></thead><tbody>'+
-    staff.map(s=>{const r=window.v123Calc(s.display_name);const t=draft.targets[key(s.username)]||'';return '<tr><td><b>'+E(s.display_name)+'</b><div class="muted" style="font-size:11px">@'+E(s.username)+'</div></td><td><input type="number" min="0" step="1" style="width:80px" data-v123t="'+E(key(s.username))+'" value="'+E(t)+'"></td><td>'+r.units+(t?' / '+E(t):'')+'</td><td style="text-align:right;white-space:nowrap">'+rs(r.incentive)+'</td><td style="text-align:right;white-space:nowrap"><b>'+rs(N(s.monthly_salary)+r.incentive)+'</b></td></tr>';}).join('')+'</tbody></table></div>'
+   '<h3 style="margin:16px 0 8px;font-size:15px">ഈ മാസം ഓരോ സ്റ്റാഫും</h3>'+
+   (staff.length?'<div class="tablewrap"><table class="tbl"><thead><tr><th>Staff</th><th>Sold</th><th style="text-align:right">Incentive</th><th style="text-align:right">Salary + Incentive</th></tr></thead><tbody>'+
+    staff.map(s=>{const r=window.v123Calc(s.display_name);const t=draft.targets[key(s.username)]||'';return '<tr><td><b>'+E(s.display_name)+'</b><div class="muted" style="font-size:11px">@'+E(s.username)+'</div></td><td>'+r.units+'</td><td style="text-align:right;white-space:nowrap">'+rs(r.incentive)+'</td><td style="text-align:right;white-space:nowrap"><b>'+rs(N(s.monthly_salary)+r.incentive)+'</b></td></tr>';}).join('')+'</tbody></table></div>'
     :'<div class="muted">Staff ലിസ്റ്റ് ലോഡ് ആകുന്നു…</div>')+
    '<div class="actions" style="margin-top:12px"><button type="button" class="btn primary" id="v123Save">Save</button><span id="v123Msg" style="font-weight:700;margin-left:8px"></span></div>';
  }
