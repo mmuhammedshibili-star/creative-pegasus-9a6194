@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/>
-<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0b3d2b"><title>MISRIYYA HEALTH CARE — V135 Clinic location punch</title>
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0b3d2b"><title>MISRIYYA HEALTH CARE — V136 Edit prescription menu</title>
 <style>
 .nav-burger{flex-shrink:0;width:42px;height:42px;border:1px solid var(--line);background:#fff;border-radius:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:0}
 .nav-burger span{display:block;width:20px;height:2.5px;border-radius:2px;background:var(--ink)}
@@ -5526,7 +5526,7 @@ details.v140-hist li{margin-bottom:6px}
 <script>
 /* V116: tells the user when a newer version is published (checks a tiny version.json on GitHub Pages — not Supabase). */
 (function(){
- const APP_VER='135';try{window.misriyyaAppVer=APP_VER;const st=document.getElementById('v127Stamp');if(st)st.textContent='V'+APP_VER;}catch(_){}
+ const APP_VER='136';try{window.misriyyaAppVer=APP_VER;const st=document.getElementById('v127Stamp');if(st)st.textContent='V'+APP_VER;}catch(_){}
  let latest=null;
  async function check(){
   try{
@@ -5765,5 +5765,73 @@ body.staff-dashboard-minimal #staffWelcomeCard .staff-summary-grid{display:none!
 <script>
 /* V135: mouse wheel must not change number boxes (consultation charge, discount, qty…). Wheel just scrolls the page. */
 document.addEventListener('wheel',function(e){var a=document.activeElement;if(a&&a.tagName==='INPUT'&&a.type==='number'&&(e.target===a||a.contains(e.target)))a.blur();},{passive:true,capture:true});
+</script>
+<style>
+/* V136 owner ⋮ menu on Dispenser / Online cards */
+.v136-k{margin-left:auto}
+.v136-k .kmenu{min-width:190px}
+.v136-k .kmenu .btn{text-align:left;white-space:nowrap}
+#v136Modal{position:fixed;inset:0;z-index:9999;background:#0006;display:flex;align-items:flex-start;justify-content:center;padding:24px 12px;overflow:auto}
+#v136Modal .box{background:#fff;border-radius:18px;max-width:640px;width:100%;padding:16px;box-shadow:0 20px 60px #0004}
+#v136Modal textarea{width:100%;min-height:320px;font:inherit;font-size:15px;line-height:1.45;padding:10px;border:1px solid #cfdcd5;border-radius:12px;box-sizing:border-box}
+</style>
+<script>
+/* V136: Owner can fix a prescription or a bill straight from Dispenser / Online cards (⋮ → Edit prescription / Edit bill).
+   Edit prescription changes the bill's prescription text (and its packing job copy) and saves with the normal clinic sync.
+   Edit bill opens the existing owner bill editor. No extra Supabase calls. */
+(function(){
+ const E=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const isOwner=()=>window.misriyyaRole==='owner';
+ const items=id=>'<button class="btn" type="button" data-v136="rx" data-id="'+E(id)+'">📝 Edit prescription</button><button class="btn" type="button" data-v136="bill" data-id="'+E(id)+'">✏ Edit bill</button>';
+ function decorate(){
+  if(!isOwner())return;
+  document.querySelectorAll('article[data-dispenser-card],article[data-online-card]').forEach(a=>{
+   if(a.querySelector('[data-v136]'))return;
+   const id=a.getAttribute('data-dispenser-card')||a.getAttribute('data-online-card');const head=a.querySelector('.dispenser-card-head');if(!id||!head)return;
+   const k=head.querySelector(':scope > details.kebab .kmenu');
+   if(k){k.insertAdjacentHTML('afterbegin',items(id));return;}
+   head.insertAdjacentHTML('beforeend','<details class="kebab v136-k"><summary aria-label="More">⋮</summary><div class="kmenu">'+items(id)+'</div></details>');
+  });
+ }
+ let t=null;const mo=new MutationObserver(()=>{clearTimeout(t);t=setTimeout(decorate,60);});
+ function watch(){['dispenserQueueList','onlineQueueList'].forEach(i=>{const el=document.getElementById(i);if(el&&!el.__v136){el.__v136=1;mo.observe(el,{childList:true,subtree:true});}});decorate();}
+ const findBill=id=>((typeof data!=='undefined'&&data&&data.bills)||[]).find(x=>String(x.id)===String(id))||null;
+ const remoteBill=id=>{try{return (window.dispenserRemoteBills&&window.dispenserRemoteBills()||[]).find(x=>String(x.id)===String(id))||null;}catch(_){return null;}};
+ function rxText(b){
+  const snap=b.prescriptionSnapshot&&typeof b.prescriptionSnapshot==='object'?b.prescriptionSnapshot:null;
+  const o=String(b.prescriptionText||b.billSourceText||(snap&&snap.sourceText)||'').trim();if(o)return o;
+  if(snap&&Array.isArray(snap.rows))return ['Diagnosis: '+(snap.diagnosis||''),...snap.rows.map((r,i)=>(i+1)+'. '+(r.name||'')+' | '+(r.dose||'')+' | '+(r.duration||'')+' | '+(r.instruction||''))].join('\n');
+  return (Array.isArray(b.items)?b.items:[]).map((x,i)=>(i+1)+'. '+(x.name||'')+' × '+(x.qty??'')).join('\n');
+ }
+ function close(){const m=document.getElementById('v136Modal');if(m)m.remove();}
+ function openRx(id){
+  const b=findBill(id);if(!b){alert('ഈ ബിൽ ഈ ഉപകരണത്തിൽ കണ്ടെത്തിയില്ല. ഒരു നിമിഷം കഴിഞ്ഞ് വീണ്ടും ശ്രമിക്കൂ.');return;}
+  close();
+  document.body.insertAdjacentHTML('beforeend','<div id="v136Modal" role="dialog" aria-modal="true"><div class="box"><h3 style="margin:0 0 4px">📝 Edit prescription</h3><div class="muted" style="margin-bottom:10px">'+E(b.name||'')+(b.reg?' · '+E(b.reg):'')+' · Bill '+E(b.id)+'</div><textarea id="v136Text"></textarea><div class="muted" style="font-size:12px;margin:6px 0 10px">ഇത് prescription എഴുത്ത് മാത്രം മാറ്റും. മരുന്നിന്റെ എണ്ണം / തുക മാറ്റാൻ "Edit bill" ഉപയോഗിക്കുക.</div><div class="actions"><button type="button" class="btn primary" id="v136Save">Save</button><button type="button" class="btn" id="v136Cancel">Cancel</button><span id="v136Msg" style="font-weight:700;margin-left:8px"></span></div></div></div>');
+  const ta=document.getElementById('v136Text');ta.value=rxText(b);ta.focus();
+  document.getElementById('v136Cancel').onclick=close;
+  document.getElementById('v136Modal').addEventListener('click',e=>{if(e.target.id==='v136Modal')close();});
+  document.getElementById('v136Save').onclick=async()=>{
+   const txt=ta.value.replace(/\s+$/,'');const now=new Date().toISOString();
+   b.prescriptionText=txt;b.prescriptionEditedAt=now;b.updatedAt=now;
+   (data.packingJobs||[]).forEach(j=>{if(String(j.billId)===String(b.id))j.prescriptionText=txt;});
+   [remoteBill(id),...(Array.isArray(window.dispenserBillsView)?window.dispenserBillsView.filter(x=>x&&String(x.id)===String(id)):[])].forEach(r=>{if(r&&r!==b){r.prescriptionText=txt;r.prescriptionEditedAt=now;}});
+   const m=document.getElementById('v136Msg');if(m)m.textContent='Saving…';
+   try{if(typeof save==='function')save();const res=window.pushClinicNow?await window.pushClinicNow():{ok:true};
+    if(res&&res.ok===false){if(m)m.textContent='ഈ ഉപകരണത്തിൽ സേവ് ആയി; Cloud: '+(res.reason||'later');return;}
+   }catch(err){if(m)m.textContent='Cloud sync പിന്നീട്: '+(err.message||'');return;}
+   close();try{window.renderDispenserQueue&&window.renderDispenserQueue();}catch(_){}try{window.renderOnlineQueue&&window.renderOnlineQueue();}catch(_){}try{window.renderPackingQueue&&window.renderPackingQueue();}catch(_){}
+  };
+ }
+ document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-v136]');if(!b||!isOwner())return;
+  e.preventDefault();e.stopPropagation();const d=b.closest('details');if(d)d.removeAttribute('open');
+  const id=b.getAttribute('data-id');
+  if(b.getAttribute('data-v136')==='rx')openRx(id);
+  else if(typeof window.ownerEditBill==='function'||typeof ownerEditBill==='function')(window.ownerEditBill||ownerEditBill)(id);
+ },true);
+ document.addEventListener('keydown',e=>{if(e.key==='Escape')close();});
+ setTimeout(watch,1500);setInterval(watch,5000);
+})();
 </script>
 </body></html>
