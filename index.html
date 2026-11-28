@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/>
-<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0b3d2b"><title>MISRIYYA HEALTH CARE — V137 Monthly attendance</title>
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0b3d2b"><title>MISRIYYA HEALTH CARE — V138 Sikanjabeen list table</title>
 <style>
 .nav-burger{flex-shrink:0;width:42px;height:42px;border:1px solid var(--line);background:#fff;border-radius:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:0}
 .nav-burger span{display:block;width:20px;height:2.5px;border-radius:2px;background:var(--ink)}
@@ -5527,7 +5527,7 @@ details.v140-hist li{margin-bottom:6px}
 <script>
 /* V116: tells the user when a newer version is published (checks a tiny version.json on GitHub Pages — not Supabase). */
 (function(){
- const APP_VER='137';try{window.misriyyaAppVer=APP_VER;const st=document.getElementById('v127Stamp');if(st)st.textContent='V'+APP_VER;}catch(_){}
+ const APP_VER='138';try{window.misriyyaAppVer=APP_VER;const st=document.getElementById('v127Stamp');if(st)st.textContent='V'+APP_VER;}catch(_){}
  let latest=null;
  async function check(){
   try{
@@ -5886,6 +5886,69 @@ document.addEventListener('wheel',function(e){var a=document.activeElement;if(a&
  }
  document.addEventListener('click',e=>{if(e.target.closest('#v137Go'))load();if(e.target.closest('button[data-tab="attendance"]'))setTimeout(panel,300);});
  setTimeout(panel,2500);setInterval(panel,10000);
+})();
+</script>
+<style>
+/* V138 Sikanjabeen list as a table */
+#v138Sku .tw{overflow-x:auto}
+#v138Sku table{border-collapse:collapse;width:100%;min-width:640px}
+#v138Sku th,#v138Sku td{border:1px solid #dfe9e3;padding:4px;vertical-align:middle}
+#v138Sku th{background:#eef5f0;font-size:13px;font-weight:800;text-align:left;padding:8px 6px}
+#v138Sku td input{width:100%;box-sizing:border-box;border:1px solid transparent;background:transparent;padding:7px 6px;font:inherit;font-size:14px;border-radius:8px}
+#v138Sku td input:focus{border-color:#16834a;background:#fff;outline:none}
+#v138Sku td.n input{text-align:right}
+#v138Sku tr:nth-child(even) td{background:#fafcfb}
+#v138Sku .x{border:0;background:none;color:#b42318;font-size:18px;cursor:pointer;padding:4px 8px}
+#v138Sku .num{width:34px;text-align:center;color:#5b6b64;font-size:12px}
+</style>
+<script>
+/* V138: Sikanjabeen medicine list edited as a simple table (same saved format underneath: "Name | other | =rate/tabs@perTab"). */
+(function(){
+ const E=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ function parse(line){
+  const parts=String(line).split('|').map(x=>x.trim());let rate='',tabs='',per='';
+  const last=parts.length>1?parts[parts.length-1]:'';
+  if(/^=/.test(last)){parts.pop();const m=last.slice(1).match(/^\s*([\d.]*)\s*(?:\/\s*([\d.]*))?\s*(?:@\s*([\d.]*))?/);if(m){rate=m[1]||'';tabs=m[2]||'';per=m[3]||'';}}
+  const names=parts.filter(Boolean);return {name:names[0]||'',other:names.slice(1).join(', '),rate,tabs,per};
+ }
+ function build(r){
+  const name=r.name.trim();if(!name)return '';
+  const other=r.other.split(/[,|]/).map(x=>x.trim()).filter(Boolean);
+  let line=[name,...other].join(' | ');
+  if(r.rate!==''||r.tabs!==''||r.per!==''){line+=' | ='+(r.rate||0)+'/'+(r.tabs||0)+(r.per!==''?'@'+r.per:'');}
+  return line;
+ }
+ let rows=[];
+ function readRows(){document.querySelectorAll('#v138Sku tbody tr').forEach((tr,i)=>{const g=k=>(tr.querySelector('[data-k="'+k+'"]')||{}).value||'';if(rows[i])rows[i]={name:g('name'),other:g('other'),rate:g('rate'),tabs:g('tabs'),per:g('per')};});}
+ function draw(){
+  const box=document.getElementById('v138Sku');if(!box)return;
+  box.innerHTML='<div class="tw"><table><thead><tr><th class="num">#</th><th style="min-width:170px">Medicine name</th><th style="min-width:170px">ബില്ലിലെ മറ്റു പേരുകൾ <span style="font-weight:600">(comma ഇട്ട്)</span></th><th>Bottle ₹</th><th>Tabs / bottle</th><th>₹ / tab</th><th></th></tr></thead><tbody>'+
+   rows.map((r,i)=>'<tr><td class="num">'+(i+1)+'</td><td><input data-k="name" value="'+E(r.name)+'" placeholder="പേര്"></td><td><input data-k="other" value="'+E(r.other)+'"></td><td class="n"><input data-k="rate" type="number" min="0" step="any" inputmode="decimal" value="'+E(r.rate)+'"></td><td class="n"><input data-k="tabs" type="number" min="0" step="any" inputmode="decimal" value="'+E(r.tabs)+'"></td><td class="n"><input data-k="per" type="number" min="0" step="any" inputmode="decimal" value="'+E(r.per)+'" placeholder="'+(Number(r.rate)>0&&Number(r.tabs)>0?E(Math.round(r.rate/r.tabs*100)/100):'')+'"></td><td><button type="button" class="x" data-v138del="'+i+'" aria-label="Remove">✕</button></td></tr>').join('')+
+   '</tbody></table></div><div class="actions" style="margin-top:8px"><button type="button" class="btn" id="v138Add">+ Medicine ചേർക്കുക</button></div>';
+ }
+ function open(){
+  const ta=document.getElementById('skuText');if(!ta)return;
+  rows=ta.value.split('\n').map(x=>x.trim()).filter(Boolean).map(parse);
+  let box=document.getElementById('v138Sku');
+  if(!box){box=document.createElement('div');box.id='v138Sku';ta.insertAdjacentElement('beforebegin',box);ta.style.display='none';
+   const help=document.querySelector('#skuEdit > p.muted');if(help)help.innerHTML='ഓരോ വരിയിലും ഒരു മെഡിസിൻ. ബില്ലിൽ വേറെ പേരിൽ എഴുതാറുണ്ടെങ്കിൽ ആ പേരുകൾ "മറ്റു പേരുകൾ" കോളത്തിൽ comma ഇട്ട് ചേർക്കുക. Bottle ₹ / Tabs / ₹ per tab അറിയില്ലെങ്കിൽ ഒഴിച്ചിടാം.';}
+  draw();
+ }
+ const oldToggle=window.skuToggleEdit;
+ window.skuToggleEdit=function(){oldToggle&&oldToggle();const e=document.getElementById('skuEdit');if(e&&e.style.display!=='none')open();};
+ const oldSave=window.skuSaveList;
+ window.skuSaveList=function(){
+  if(document.getElementById('v138Sku')){readRows();const bad=rows.filter(r=>!r.name.trim()&&(r.other||r.rate||r.tabs||r.per));if(bad.length){alert('പേര് ഇല്ലാത്ത ഒരു വരി ഉണ്ട്. പേര് കൊടുക്കുക അല്ലെങ്കിൽ ✕ അമർത്തി മാറ്റുക.');return;}
+   document.getElementById('skuText').value=rows.map(build).filter(Boolean).join('\n');}
+  oldSave&&oldSave();open();
+ };
+ const oldReset=window.skuResetList;
+ window.skuResetList=function(){oldReset&&oldReset();if(document.getElementById('v138Sku'))open();};
+ document.addEventListener('click',e=>{
+  if(e.target.closest('#v138Add')){readRows();rows.push({name:'',other:'',rate:'',tabs:'',per:''});draw();const ins=document.querySelectorAll('#v138Sku tbody tr:last-child input');if(ins[0])ins[0].focus();return;}
+  const d=e.target.closest('[data-v138del]');if(d){readRows();const r=rows[Number(d.dataset.v138del)];if(r&&r.name&&!confirm(r.name+' ലിസ്റ്റിൽ നിന്ന് മാറ്റട്ടെ? (Save list അമർത്തിയാലേ സേവ് ആകൂ)'))return;rows.splice(Number(d.dataset.v138del),1);draw();}
+ });
+ window.v138Parse=parse;window.v138Build=build;
 })();
 </script>
 </body></html>
