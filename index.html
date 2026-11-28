@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/>
-<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0b3d2b"><title>MISRIYYA HEALTH CARE — V123 Staff targets and incentive</title>
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0b3d2b"><title>MISRIYYA HEALTH CARE — V124 Staff target card fix</title>
 <style>
 .nav-burger{flex-shrink:0;width:42px;height:42px;border:1px solid var(--line);background:#fff;border-radius:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:0}
 .nav-burger span{display:block;width:20px;height:2.5px;border-radius:2px;background:var(--ink)}
@@ -5510,7 +5510,7 @@ details.v140-hist li{margin-bottom:6px}
 <script>
 /* V116: tells the user when a newer version is published (checks a tiny version.json on GitHub Pages — not Supabase). */
 (function(){
- const APP_VER='123';
+ const APP_VER='124';
  let latest=null;
  async function check(){
   try{
@@ -5574,6 +5574,7 @@ details.v140-hist li{margin-bottom:6px}
 <style>
 /* V123 targets & incentive */
 #staffWelcomeInitial,.staff-eyebrow,.staff-live-pill{display:none!important}
+body.staff-dashboard-minimal #dashboard > #v123StaffTarget.card:not(#zz1):not(#zz2){display:block!important}
 .v123-card{margin-top:12px}
 .v123-card h3{margin:0 0 10px;font-size:17px}
 .v123-bar{height:14px;border-radius:999px;background:#e7efe9;overflow:hidden;margin:8px 0 4px}
