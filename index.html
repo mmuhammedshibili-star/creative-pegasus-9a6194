@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/>
-<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0b3d2b"><title>MISRIYYA HEALTH CARE — V130 Staff incentive settings fix</title>
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0b3d2b"><title>MISRIYYA HEALTH CARE — V131 Staff incentive counts</title>
 <style>
 .nav-burger{flex-shrink:0;width:42px;height:42px;border:1px solid var(--line);background:#fff;border-radius:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:0}
 .nav-burger span{display:block;width:20px;height:2.5px;border-radius:2px;background:var(--ink)}
@@ -5511,7 +5511,7 @@ details.v140-hist li{margin-bottom:6px}
 <script>
 /* V116: tells the user when a newer version is published (checks a tiny version.json on GitHub Pages — not Supabase). */
 (function(){
- const APP_VER='130';try{window.misriyyaAppVer=APP_VER;const st=document.getElementById('v127Stamp');if(st)st.textContent='V'+APP_VER;}catch(_){}
+ const APP_VER='131';try{window.misriyyaAppVer=APP_VER;const st=document.getElementById('v127Stamp');if(st)st.textContent='V'+APP_VER;}catch(_){}
  let latest=null;
  async function check(){
   try{
@@ -5611,7 +5611,8 @@ body.staff-dashboard-minimal #dashboard > #v123StaffTarget.card:not(#zz1):not(#z
   c=(c&&typeof c==='object')?c:{};
   return {products:Array.isArray(c.products)?c.products.filter(p=>p&&p.name).map(p=>({name:p.name,perUnit:N(p.perUnit),slabs:(Array.isArray(p.slabs)?p.slabs:[]).map(x=>({above:N(x&&x.above),rate:N(x&&x.rate)})).filter(x=>x.above>=0&&x.rate>0).sort((a,b)=>a.above-b.above)})):[],targets:(c.targets&&typeof c.targets==='object')?c.targets:{}};
  }
- function bills(){return window.misriyyaRole==='owner'?(data.bills||[]):((window.dispenserRemoteBills&&window.dispenserRemoteBills())||[]);}
+ // staff: Medicine Sale bills are kept apart from case bills in window.__sideBills (see keepCases)
+ function bills(){if(window.misriyyaRole==='owner')return data.bills||[];const seen=new Set(),out=[];for(const b of [...((window.dispenserRemoteBills&&window.dispenserRemoteBills())||[]),...(Array.isArray(window.__sideBills)?window.__sideBills:[])]){const k=String(b&&b.id);if(!b||seen.has(k))continue;seen.add(k);out.push(b);}return out;}
  const monthKey=d=>{const x=new Date(d);return x.getFullYear()+'-'+(x.getMonth()+1);};
  // units of incentive products sold by one staff (by display name) in a month
  window.v123Calc=function(staffName,when){
