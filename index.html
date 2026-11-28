@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/>
-<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0b3d2b"><title>MISRIYYA HEALTH CARE — V126 Incentive name matching</title>
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0b3d2b"><title>MISRIYYA HEALTH CARE — V127 Punch buttons</title>
 <style>
 .nav-burger{flex-shrink:0;width:42px;height:42px;border:1px solid var(--line);background:#fff;border-radius:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:0}
 .nav-burger span{display:block;width:20px;height:2.5px;border-radius:2px;background:var(--ink)}
@@ -2260,6 +2260,7 @@ updateDash();
       const todays=records.filter(x=>x.work_date===today).sort((a,b)=>String(a.punch_in_at).localeCompare(String(b.punch_in_at)));
       if(pi)pi.textContent=todays.length?new Date(todays[0].punch_in_at).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:true}):'Not punched in';
       const last=todays.slice().reverse().find(x=>x.punch_out_at);
+      try{window.v127Me=profile;window.v127Punch={inAt:todays.length?todays[0].punch_in_at:null,outAt:last?last.punch_out_at:null,open:records.some(x=>!x.punch_out_at)};window.v127PaintPunch&&window.v127PaintPunch();}catch(_){}
       if(po)po.textContent=last?new Date(last.punch_out_at).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:true}):(todays.some(x=>!x.punch_out_at)?'Not punched out yet':'—');
       const now=new Date(),month=String(now.getMonth()+1).padStart(2,'0'),year=String(now.getFullYear()),daysInMonth=new Date(now.getFullYear(),now.getMonth()+1,0).getDate();
       const monthRecords=records.filter(x=>String(x.work_date||'').startsWith(year+'-'+month));
@@ -4910,7 +4911,7 @@ details.v140-hist li{margin-bottom:6px}
  }catch(e){}};
  setInterval(fix,1500);
  const rr=window.refreshRoleUI;if(typeof rr==='function')window.refreshRoleUI=function(){const r=rr.apply(this,arguments);setTimeout(fix,50);return r;};
- const b=document.createElement('div');b.textContent='v152';b.style.cssText='position:fixed;right:6px;bottom:4px;font-size:10px;color:#889;opacity:.7;z-index:5;pointer-events:none';document.body.appendChild(b);
+ const b=document.createElement('div');b.id='v127Stamp';b.textContent='v152';b.style.cssText='position:fixed;right:6px;bottom:4px;font-size:10px;color:#889;opacity:.7;z-index:5;pointer-events:none';document.body.appendChild(b);
 })();
 </script>
 <script>
@@ -5510,7 +5511,7 @@ details.v140-hist li{margin-bottom:6px}
 <script>
 /* V116: tells the user when a newer version is published (checks a tiny version.json on GitHub Pages — not Supabase). */
 (function(){
- const APP_VER='126';
+ const APP_VER='127';try{window.misriyyaAppVer=APP_VER;const st=document.getElementById('v127Stamp');if(st)st.textContent='V'+APP_VER;}catch(_){}
  let latest=null;
  async function check(){
   try{
@@ -5632,7 +5633,9 @@ body.staff-dashboard-minimal #dashboard > #v123StaffTarget.card:not(#zz1):not(#z
 
  // ---------- Staff dashboard ----------
  function staffCard(){
-  if(window.misriyyaRole!=='staff'||!window.misriyyaStaff)return;
+  if(window.misriyyaRole!=='staff')return;
+  if(!window.misriyyaStaff||!window.misriyyaStaff.name){const m=window.v127Me;if(!m)return;window.misriyyaStaff={id:m.user_id,name:m.display_name,username:m.username,role:'staff',salary:Number(m.monthly_salary||0)};}
+  if(!N(window.misriyyaStaff.salary)&&window.v127Me&&window.v127Me.monthly_salary)window.misriyyaStaff.salary=Number(window.v127Me.monthly_salary);
   let el=$('v123StaffTarget');
   if(!el){const w=$('staffWelcomeCard');if(!w)return;el=document.createElement('div');el.id='v123StaffTarget';el.className='card v123-card';w.insertAdjacentElement('afterend',el);}
   const st=window.misriyyaStaff,r=window.v123Calc(st.name),target=N(r.cfg.targets[key(st.username)]),salary=N(st.salary);
@@ -5655,15 +5658,15 @@ body.staff-dashboard-minimal #dashboard > #v123StaffTarget.card:not(#zz1):not(#z
   if(!draft){const c=cfg();draft={products:c.products.map(p=>({name:p.name,perUnit:N(p.perUnit),slabs:p.slabs.map(x=>({...x}))})),targets:{...c.targets}};}
   const meds=[...new Set((data.meds||[]).map(m=>String(m&&m.name||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
   const opt=sel=>'<option value="">— product —</option>'+meds.map(n=>'<option'+(key(n)===key(sel)?' selected':'')+'>'+E(n)+'</option>').join('')+(sel&&!meds.some(n=>key(n)===key(sel))?'<option selected>'+E(sel)+'</option>':'');
-  const staff=(window.v123StaffList||[]).filter(s=>s&&s.is_active!==false);
+  const staff=(window.v123StaffList||[]).filter(s=>s&&s.is_active!==false&&s.role!=='owner'&&N(s.monthly_salary)>0);
   el.innerHTML='<h2>🎯 Targets &amp; Incentive</h2>'+
    '<h3 style="margin:6px 0 4px;font-size:15px">Incentive products &amp; slabs</h3><div class="v123-sub" style="margin-bottom:8px">ആദ്യ ₹ = തുടക്ക rate. Slab കടന്നാൽ ആ മാസം വിറ്റ എല്ലാ എണ്ണത്തിനും പുതിയ rate.</div>'+
    draft.products.map((p,i)=>'<div class="v123-pbox"><div class="v123-prod"><select data-v123p="'+i+'">'+opt(p.name)+'</select><input type="number" min="0" step="0.5" inputmode="decimal" data-v123r="'+i+'" value="'+E(p.perUnit||'')+'" placeholder="₹ / എണ്ണം"><button type="button" class="btn" data-v123del="'+i+'" aria-label="Remove">✕</button></div>'+
     (p.slabs||[]).map((x,j)=>'<div class="v123-slab"><span>എണ്ണം</span><input type="number" min="1" step="1" inputmode="numeric" data-v123sa="'+i+'_'+j+'" value="'+E(x.above||'')+'" placeholder="200"><span>കടന്നാൽ ₹</span><input type="number" min="0" step="0.5" inputmode="decimal" data-v123sr="'+i+'_'+j+'" value="'+E(x.rate||'')+'" placeholder="7"><button type="button" class="btn" data-v123sdel="'+i+'_'+j+'" aria-label="Remove slab">✕</button></div>').join('')+
     '<button type="button" class="btn" style="font-size:12px;padding:6px 10px" data-v123sadd="'+i+'">+ Slab</button></div>').join('')+
    '<button type="button" class="btn" id="v123Add">+ Product ചേർക്കുക</button>'+
-   '<h3 style="margin:16px 0 8px;font-size:15px">Monthly target (എണ്ണം) · ഈ മാസം ഇതുവരെ</h3>'+
-   (staff.length?'<div class="tablewrap"><table class="tbl"><thead><tr><th>Staff</th><th>Target</th><th>Sold</th><th style="text-align:right">Incentive</th><th style="text-align:right">Salary + Incentive</th></tr></thead><tbody>'+
+   '<h3 style="margin:16px 0 4px;font-size:15px">ഈ മാസം ഓരോ സ്റ്റാഫും</h3><div class="v123-sub" style="margin-bottom:8px">Target = സ്റ്റാഫിന് dashboard-ൽ progress bar ആയി കാണാനുള്ള ലക്ഷ്യം മാത്രം (എല്ലാ incentive products-ഉം കൂട്ടി എണ്ണം). Incentive തുക slab അനുസരിച്ചാണ്, target-നെ ആശ്രയിക്കുന്നില്ല. വേണ്ടെങ്കിൽ ഒഴിച്ചിടാം.</div>'+
+   (staff.length?'<div class="tablewrap"><table class="tbl"><thead><tr><th>Staff</th><th>Target<div style="font-size:10px;font-weight:600;color:#5b6b64">ലക്ഷ്യം (എണ്ണം)</div></th><th>Sold</th><th style="text-align:right">Incentive</th><th style="text-align:right">Salary + Incentive</th></tr></thead><tbody>'+
     staff.map(s=>{const r=window.v123Calc(s.display_name);const t=draft.targets[key(s.username)]||'';return '<tr><td><b>'+E(s.display_name)+'</b><div class="muted" style="font-size:11px">@'+E(s.username)+'</div></td><td><input type="number" min="0" step="1" style="width:80px" data-v123t="'+E(key(s.username))+'" value="'+E(t)+'"></td><td>'+r.units+(t?' / '+E(t):'')+'</td><td style="text-align:right;white-space:nowrap">'+rs(r.incentive)+'</td><td style="text-align:right;white-space:nowrap"><b>'+rs(N(s.monthly_salary)+r.incentive)+'</b></td></tr>';}).join('')+'</tbody></table></div>'
     :'<div class="muted">Staff ലിസ്റ്റ് ലോഡ് ആകുന്നു…</div>')+
    '<div class="actions" style="margin-top:12px"><button type="button" class="btn primary" id="v123Save">Save</button><span id="v123Msg" style="font-weight:700;margin-left:8px"></span></div>';
@@ -5703,4 +5706,41 @@ body.staff-dashboard-minimal #dashboard > #v123StaffTarget.card:not(#zz1):not(#z
 })();
 </script>
 
+<style>
+/* V127 staff punch buttons */
+body.staff-dashboard-minimal #staffWelcomeCard .staff-summary-grid{display:none!important}
+#v127Punch{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 8px}
+#v127Punch button{border:2px solid #cfdcd5;background:#fff;color:#0b3d27;border-radius:14px;padding:12px 8px;font-size:16px;font-weight:800;line-height:1.2;cursor:pointer}
+#v127Punch button small{display:block;font-size:12px;font-weight:700;margin-top:3px;opacity:.85}
+#v127Punch button.on{background:linear-gradient(135deg,#0b8a4a,#22b468);border-color:#0b8a4a;color:#fff;box-shadow:0 0 0 3px rgba(34,180,104,.18)}
+#v127Punch button:disabled:not(.on){opacity:.45;cursor:default}
+#v127Punch button.on:disabled{opacity:1;cursor:default}
+</style>
+<script>
+/* V127: Punch In / Punch Out as two buttons on the staff dashboard; the done one lights green. Uses the existing punch + summary calls only. */
+(function(){
+ const t=x=>x?new Date(x).toLocaleTimeString('en-IN',{hour:'numeric',minute:'2-digit',hour12:true}):'';
+ let busy=false;
+ function paint(){
+  if(window.misriyyaRole!=='staff')return;
+  const card=document.getElementById('staffWelcomeCard');if(!card)return;
+  let box=document.getElementById('v127Punch');
+  if(!box){box=document.createElement('div');box.id='v127Punch';const g=card.querySelector('.staff-summary-grid');(g||card.lastChild).insertAdjacentElement(g?'afterend':'beforebegin',box);}
+  const p=window.v127Punch;
+  if(!p){box.innerHTML='<button type="button" disabled>Punch In<small>…</small></button><button type="button" disabled>Punch Out<small>…</small></button>';return;}
+  const inOn=!!p.inAt,outOn=!!p.outAt&&!p.open;
+  box.innerHTML='<button type="button" data-v127="in" class="'+(inOn?'on':'')+'"'+((p.open||outOn||busy)?' disabled':'')+'>'+(inOn?'✓ ':'')+'Punch In'+(inOn?'<small>'+t(p.inAt)+'</small>':'')+'</button>'+
+   '<button type="button" data-v127="out" class="'+(outOn?'on':'')+'"'+((!p.open||busy)?' disabled':'')+'>'+(outOn?'✓ ':'')+'Punch Out'+(outOn?'<small>'+t(p.outAt)+'</small>':'')+'</button>';
+ }
+ window.v127PaintPunch=paint;
+ document.addEventListener('click',async e=>{
+  const b=e.target.closest('#v127Punch [data-v127]');if(!b||b.disabled||busy)return;
+  const kind=b.dataset.v127;
+  if(kind==='out'&&!confirm('Punch Out ചെയ്യട്ടെ?'))return;
+  busy=true;b.disabled=true;b.innerHTML=(kind==='in'?'Punch In':'Punch Out')+'<small>Recording…</small>';
+  try{await window.punchAttendance(kind);}catch(_){}finally{busy=false;paint();}
+ });
+ setTimeout(paint,2500);
+})();
+</script>
 </body></html>
