@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/>
-<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0b3d2b"><title>MISRIYYA HEALTH CARE — V127 Punch buttons</title>
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0b3d2b"><title>MISRIYYA HEALTH CARE — V128 Staff incentive card wording</title>
 <style>
 .nav-burger{flex-shrink:0;width:42px;height:42px;border:1px solid var(--line);background:#fff;border-radius:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:0}
 .nav-burger span{display:block;width:20px;height:2.5px;border-radius:2px;background:var(--ink)}
@@ -5511,7 +5511,7 @@ details.v140-hist li{margin-bottom:6px}
 <script>
 /* V116: tells the user when a newer version is published (checks a tiny version.json on GitHub Pages — not Supabase). */
 (function(){
- const APP_VER='127';try{window.misriyyaAppVer=APP_VER;const st=document.getElementById('v127Stamp');if(st)st.textContent='V'+APP_VER;}catch(_){}
+ const APP_VER='128';try{window.misriyyaAppVer=APP_VER;const st=document.getElementById('v127Stamp');if(st)st.textContent='V'+APP_VER;}catch(_){}
  let latest=null;
  async function check(){
   try{
@@ -5609,7 +5609,7 @@ body.staff-dashboard-minimal #dashboard > #v123StaffTarget.card:not(#zz1):not(#z
   if(window.misriyyaRole==='owner')c=data&&data.settings&&data.settings.incentives;
   else{try{c=window.dispenserClinicSettings&&window.dispenserClinicSettings().incentives;}catch(_){}}
   c=(c&&typeof c==='object')?c:{};
-  return {products:Array.isArray(c.products)?c.products.filter(p=>p&&p.name).map(p=>({name:p.name,perUnit:N(p.perUnit),slabs:(Array.isArray(p.slabs)?p.slabs:[]).map(x=>({above:N(x&&x.above),rate:N(x&&x.rate)})).filter(x=>x.above>0&&x.rate>0).sort((a,b)=>a.above-b.above)})):[],targets:(c.targets&&typeof c.targets==='object')?c.targets:{}};
+  return {products:Array.isArray(c.products)?c.products.filter(p=>p&&p.name).map(p=>({name:p.name,perUnit:N(p.perUnit),slabs:(Array.isArray(p.slabs)?p.slabs:[]).map(x=>({above:N(x&&x.above),rate:N(x&&x.rate)})).filter(x=>x.above>=0&&x.rate>0).sort((a,b)=>a.above-b.above)})):[],targets:(c.targets&&typeof c.targets==='object')?c.targets:{}};
  }
  function bills(){return window.misriyyaRole==='owner'?(data.bills||[]):((window.dispenserRemoteBills&&window.dispenserRemoteBills())||[]);}
  const monthKey=d=>{const x=new Date(d);return x.getFullYear()+'-'+(x.getMonth()+1);};
@@ -5641,9 +5641,9 @@ body.staff-dashboard-minimal #dashboard > #v123StaffTarget.card:not(#zz1):not(#z
   const st=window.misriyyaStaff,r=window.v123Calc(st.name),target=N(r.cfg.targets[key(st.username)]),salary=N(st.salary);
   const pct=target>0?Math.min(100,Math.round(r.units/target*100)):0,done=target>0&&r.units>=target;
   const month=new Date().toLocaleDateString('en-IN',{month:'long'});
-  el.innerHTML='<h3>🎯 '+E(month)+' Target</h3>'+
+  el.innerHTML='<h3>🎯 '+E(month)+(target>0?' Target':' Incentive')+'</h3>'+
    (target>0?'<div class="v123-big">'+r.units+' <span style="font-size:18px;color:#5b6b64">/ '+target+'</span></div><div class="v123-bar'+(done?' done':'')+'"><span style="width:'+pct+'%"></span></div><div class="v123-sub">'+(done?'🎉 Target പൂർത്തിയായി!':'ഇനി '+(target-r.units)+' എണ്ണം കൂടി')+' · '+pct+'%</div>'
-    :'<div class="v123-sub">ഈ മാസത്തേക്ക് target സെറ്റ് ചെയ്തിട്ടില്ല.</div><div class="v123-big" style="margin-top:6px">'+r.units+' <span style="font-size:15px;color:#5b6b64">എണ്ണം വിറ്റു</span></div>')+
+    :(r.cfg.products.length?'<div class="v123-big">'+r.units+' <span style="font-size:15px;color:#5b6b64">എണ്ണം വിറ്റു (incentive products)</span></div>':'<div class="v123-sub">Incentive products ഇതുവരെ സെറ്റ് ചെയ്തിട്ടില്ല.</div>'))+
    (r.rows.length?'<div style="margin-top:10px">'+r.rows.map(x=>'<div class="v123-row"><span>'+E(x.name)+' × '+x.qty+(x.qty?' <span class="v123-sub">@ ₹'+x.rate+'</span>':'')+'</span><b>'+rs(x.amt)+'</b></div>'+(x.next?'<div class="v123-next">⬆ ഇനി '+x.next.need+' എണ്ണം കൂടി വിറ്റാൽ എല്ലാത്തിനും ₹'+x.next.rate+' വീതം</div>':'')).join('')+'</div>':'')+
    '<div class="v123-earn"><div class="v123-sub">Your earnings this month</div><div class="v123-big">'+rs(salary+r.incentive)+'</div><div class="v123-sub" style="margin-top:4px">Salary '+rs(salary)+' + Incentive '+rs(r.incentive)+'</div></div>';
  }
@@ -5691,7 +5691,7 @@ body.staff-dashboard-minimal #dashboard > #v123StaffTarget.card:not(#zz1):not(#z
   if(e.target.closest('#v123Save')){
    readInputs();
    document.querySelectorAll('[data-v123t]').forEach(i=>{const v=N(i.value);if(v>0)draft.targets[i.dataset.v123t]=Math.round(v);else delete draft.targets[i.dataset.v123t];});
-   const products=draft.products.filter(p=>p.name&&N(p.perUnit)>0).map(p=>({name:String(p.name).trim(),perUnit:N(p.perUnit),slabs:(p.slabs||[]).map(x=>({above:Math.round(N(x.above)),rate:N(x.rate)})).filter(x=>x.above>0&&x.rate>0).sort((a,b)=>a.above-b.above)}));
+   const products=draft.products.filter(p=>p.name&&N(p.perUnit)>0).map(p=>({name:String(p.name).trim(),perUnit:N(p.perUnit),slabs:(p.slabs||[]).map(x=>({above:Math.round(N(x.above)),rate:N(x.rate)})).filter(x=>x.above>=0&&x.rate>0).sort((a,b)=>a.above-b.above)}));
    const seen=new Set();for(const p of products){if(seen.has(key(p.name))){alert(p.name+' രണ്ടുതവണ ചേർത്തിട്ടുണ്ട്.');return;}seen.add(key(p.name));}
    data.settings=data.settings||{};data.settings.incentives={products,targets:{...draft.targets},updatedAt:new Date().toISOString()};
    draft=null;ownerCard();const msg=t=>{const m=$('v123Msg');if(m)m.textContent=t;};msg('Saving…');
