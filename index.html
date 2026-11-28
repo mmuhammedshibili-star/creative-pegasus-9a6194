@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/>
-<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0b3d2b"><title>MISRIYYA HEALTH CARE — V132 Incentive on/off per staff</title>
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0b3d2b"><title>MISRIYYA HEALTH CARE — V133 Slab progress bars</title>
 <style>
 .nav-burger{flex-shrink:0;width:42px;height:42px;border:1px solid var(--line);background:#fff;border-radius:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:0}
 .nav-burger span{display:block;width:20px;height:2.5px;border-radius:2px;background:var(--ink)}
@@ -5511,7 +5511,7 @@ details.v140-hist li{margin-bottom:6px}
 <script>
 /* V116: tells the user when a newer version is published (checks a tiny version.json on GitHub Pages — not Supabase). */
 (function(){
- const APP_VER='132';try{window.misriyyaAppVer=APP_VER;const st=document.getElementById('v127Stamp');if(st)st.textContent='V'+APP_VER;}catch(_){}
+ const APP_VER='133';try{window.misriyyaAppVer=APP_VER;const st=document.getElementById('v127Stamp');if(st)st.textContent='V'+APP_VER;}catch(_){}
  let latest=null;
  async function check(){
   try{
@@ -5628,7 +5628,7 @@ body.staff-dashboard-minimal #dashboard > #v123StaffTarget.card:not(#zz1):not(#z
    for(const it of (Array.isArray(b.items)?b.items:[])){const k=match(it&&it.name);if(!k||!rate.has(k))continue;const q=N(it.qty);if(q<=0)continue;per.set(k,(per.get(k)||0)+q);}
   }
   // slab: rate of the highest slab crossed applies to ALL units of that product (below first slab = base rate)
-  const rows=c.products.map(p=>{const q=per.get(key(p.name))||0;let rt=N(p.perUnit);for(const x of p.slabs)if(q>x.above)rt=x.rate;const nx=p.slabs.find(x=>q<=x.above&&x.rate>rt)||null;return {name:p.name,qty:q,rate:rt,amt:q*rt,next:nx?{need:nx.above+1-q,rate:nx.rate}:null};}).filter(r=>r.qty>0||r.next);
+  const rows=c.products.map(p=>{const q=per.get(key(p.name))||0;let rt=N(p.perUnit);for(const x of p.slabs)if(q>x.above)rt=x.rate;const nx=p.slabs.find(x=>q<=x.above&&x.rate>rt)||null;const top=p.slabs.length?p.slabs[p.slabs.length-1]:null;return {name:p.name,qty:q,rate:rt,amt:q*rt,next:nx?{need:nx.above+1-q,rate:nx.rate,goal:nx.above+1}:null,top:(!nx&&top&&q>top.above)?top.rate:0};}).filter(r=>r.qty>0||r.next);
   return {units:rows.reduce((s,r)=>s+r.qty,0),incentive:rows.reduce((s,r)=>s+r.amt,0),rows,cfg:c};
  };
 
@@ -5647,7 +5647,7 @@ body.staff-dashboard-minimal #dashboard > #v123StaffTarget.card:not(#zz1):not(#z
   el.innerHTML='<h3>🎯 '+E(month)+(target>0?' Target':' Incentive')+'</h3>'+
    (target>0?'<div class="v123-big">'+r.units+' <span style="font-size:18px;color:#5b6b64">/ '+target+'</span></div><div class="v123-bar'+(done?' done':'')+'"><span style="width:'+pct+'%"></span></div><div class="v123-sub">'+(done?'🎉 Target പൂർത്തിയായി!':'ഇനി '+(target-r.units)+' എണ്ണം കൂടി')+' · '+pct+'%</div>'
     :(r.cfg.products.length?'<div class="v123-big">'+r.units+' <span style="font-size:15px;color:#5b6b64">എണ്ണം വിറ്റു (incentive products)</span></div>':'<div class="v123-sub">Incentive products ഇതുവരെ സെറ്റ് ചെയ്തിട്ടില്ല.</div>'))+
-   (r.rows.length?'<div style="margin-top:10px">'+r.rows.map(x=>'<div class="v123-row"><span>'+E(x.name)+' × '+x.qty+(x.qty?' <span class="v123-sub">@ ₹'+x.rate+'</span>':'')+'</span><b>'+rs(x.amt)+'</b></div>'+(x.next?'<div class="v123-next">⬆ ഇനി '+x.next.need+' എണ്ണം കൂടി വിറ്റാൽ എല്ലാത്തിനും ₹'+x.next.rate+' വീതം</div>':'')).join('')+'</div>':'')+
+   (r.rows.length?'<div style="margin-top:10px">'+r.rows.map(x=>'<div class="v123-row"><span>'+E(x.name)+' × '+x.qty+(x.qty?' <span class="v123-sub">@ ₹'+x.rate+'</span>':'')+'</span><b>'+rs(x.amt)+'</b></div>'+(x.next?'<div class="v123-bar" style="height:12px;margin:6px 0 2px"><span style="width:'+Math.min(100,Math.round(x.qty/x.next.goal*100))+'%"></span></div><div class="v123-sub" style="display:flex;justify-content:space-between;font-size:12px;padding-bottom:6px"><span>'+x.qty+' / '+x.next.goal+'</span><b style="color:#b45309">'+x.next.goal+' എത്തിയാൽ ₹'+x.next.rate+' rate</b></div>':(x.top?'<div class="v123-bar done" style="height:12px;margin:6px 0 2px"><span style="width:100%"></span></div><div class="v123-sub" style="font-size:12px;padding-bottom:6px;color:#b45309;font-weight:700">🏆 ഏറ്റവും ഉയർന്ന rate ₹'+x.top+' ആയി</div>':''))).join('')+'</div>':'')+
    '<div class="v123-earn"><div class="v123-sub">Your earnings this month</div><div class="v123-big">'+rs(salary+r.incentive)+'</div><div class="v123-sub" style="margin-top:4px">Salary '+rs(salary)+' + Incentive '+rs(r.incentive)+'</div></div>';
  }
 
