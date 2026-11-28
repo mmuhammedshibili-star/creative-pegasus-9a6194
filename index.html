@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/>
-<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0b3d2b"><title>MISRIYYA HEALTH CARE — V131 Staff incentive counts</title>
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0b3d2b"><title>MISRIYYA HEALTH CARE — V132 Incentive on/off per staff</title>
 <style>
 .nav-burger{flex-shrink:0;width:42px;height:42px;border:1px solid var(--line);background:#fff;border-radius:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:0}
 .nav-burger span{display:block;width:20px;height:2.5px;border-radius:2px;background:var(--ink)}
@@ -5511,7 +5511,7 @@ details.v140-hist li{margin-bottom:6px}
 <script>
 /* V116: tells the user when a newer version is published (checks a tiny version.json on GitHub Pages — not Supabase). */
 (function(){
- const APP_VER='131';try{window.misriyyaAppVer=APP_VER;const st=document.getElementById('v127Stamp');if(st)st.textContent='V'+APP_VER;}catch(_){}
+ const APP_VER='132';try{window.misriyyaAppVer=APP_VER;const st=document.getElementById('v127Stamp');if(st)st.textContent='V'+APP_VER;}catch(_){}
  let latest=null;
  async function check(){
   try{
@@ -5609,7 +5609,7 @@ body.staff-dashboard-minimal #dashboard > #v123StaffTarget.card:not(#zz1):not(#z
   if(window.misriyyaRole==='owner')c=data&&data.settings&&data.settings.incentives;
   else{try{c=window.dispenserClinicSettings&&window.dispenserClinicSettings().incentives;}catch(_){}}
   c=(c&&typeof c==='object')?c:{};
-  return {products:Array.isArray(c.products)?c.products.filter(p=>p&&p.name).map(p=>({name:p.name,perUnit:N(p.perUnit),slabs:(Array.isArray(p.slabs)?p.slabs:[]).map(x=>({above:N(x&&x.above),rate:N(x&&x.rate)})).filter(x=>x.above>=0&&x.rate>0).sort((a,b)=>a.above-b.above)})):[],targets:(c.targets&&typeof c.targets==='object')?c.targets:{}};
+  return {products:Array.isArray(c.products)?c.products.filter(p=>p&&p.name).map(p=>({name:p.name,perUnit:N(p.perUnit),slabs:(Array.isArray(p.slabs)?p.slabs:[]).map(x=>({above:N(x&&x.above),rate:N(x&&x.rate)})).filter(x=>x.above>=0&&x.rate>0).sort((a,b)=>a.above-b.above)})):[],targets:(c.targets&&typeof c.targets==='object')?c.targets:{},off:Array.isArray(c.off)?c.off.map(x=>String(x).toLowerCase()):[]};
  }
  // staff: Medicine Sale bills are kept apart from case bills in window.__sideBills (see keepCases)
  function bills(){if(window.misriyyaRole==='owner')return data.bills||[];const seen=new Set(),out=[];for(const b of [...((window.dispenserRemoteBills&&window.dispenserRemoteBills())||[]),...(Array.isArray(window.__sideBills)?window.__sideBills:[])]){const k=String(b&&b.id);if(!b||seen.has(k))continue;seen.add(k);out.push(b);}return out;}
@@ -5639,7 +5639,9 @@ body.staff-dashboard-minimal #dashboard > #v123StaffTarget.card:not(#zz1):not(#z
   if(!N(window.misriyyaStaff.salary)&&window.v127Me&&window.v127Me.monthly_salary)window.misriyyaStaff.salary=Number(window.v127Me.monthly_salary);
   let el=$('v123StaffTarget');
   if(!el){const w=$('staffWelcomeCard');if(!w)return;el=document.createElement('div');el.id='v123StaffTarget';el.className='card v123-card';w.insertAdjacentElement('afterend',el);}
-  const st=window.misriyyaStaff,r=window.v123Calc(st.name),target=0,salary=N(st.salary);
+  const st=window.misriyyaStaff,salary=N(st.salary);
+  if(cfg().off.includes(String(st.username||'').toLowerCase())){el.innerHTML='<div class="v123-earn" style="margin-top:0"><div style="font-size:13px;font-weight:700;opacity:.9">Your earnings this month</div><div style="font-size:30px;font-weight:900">'+rs(salary)+'</div><div style="font-size:13px;opacity:.9">Salary</div></div>';return;}
+  const r=window.v123Calc(st.name),target=0;
   const pct=target>0?Math.min(100,Math.round(r.units/target*100)):0,done=target>0&&r.units>=target;
   const month=new Date().toLocaleDateString('en-IN',{month:'long'});
   el.innerHTML='<h3>🎯 '+E(month)+(target>0?' Target':' Incentive')+'</h3>'+
@@ -5656,7 +5658,7 @@ body.staff-dashboard-minimal #dashboard > #v123StaffTarget.card:not(#zz1):not(#z
   const sec=$('staffaccounts');if(!sec)return;
   let el=$('v123Owner');
   if(!el){el=document.createElement('div');el.id='v123Owner';el.className='card';el.style.marginTop='16px';(sec.querySelector('.grid')||sec).appendChild(el);}
-  if(!draft){const c=cfg();draft={products:c.products.map(p=>({name:p.name,perUnit:N(p.perUnit),slabs:p.slabs.map(x=>({...x}))})),targets:{...c.targets}};}
+  if(!draft){const c=cfg();draft={products:c.products.map(p=>({name:p.name,perUnit:N(p.perUnit),slabs:p.slabs.map(x=>({...x}))})),targets:{...c.targets},off:[...c.off]};}
   const meds=[...new Set((data.meds||[]).map(m=>String(m&&m.name||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
   const opt=sel=>'<option value="">— product —</option>'+meds.map(n=>'<option'+(key(n)===key(sel)?' selected':'')+'>'+E(n)+'</option>').join('')+(sel&&!meds.some(n=>key(n)===key(sel))?'<option selected>'+E(sel)+'</option>':'');
   const staff=(window.v123StaffList||[]).filter(s=>s&&s.is_active!==false&&s.role!=='owner'&&N(s.monthly_salary)>0);
@@ -5666,9 +5668,9 @@ body.staff-dashboard-minimal #dashboard > #v123StaffTarget.card:not(#zz1):not(#z
     (p.slabs||[]).map((x,j)=>'<div class="v123-slab"><span>എണ്ണം</span><input type="number" min="1" step="1" inputmode="numeric" data-v123sa="'+i+'_'+j+'" value="'+E(x.above||'')+'" placeholder="200"><span>കടന്നാൽ ₹</span><input type="number" min="0" step="0.5" inputmode="decimal" data-v123sr="'+i+'_'+j+'" value="'+E(x.rate||'')+'" placeholder="7"><button type="button" class="btn" data-v123sdel="'+i+'_'+j+'" aria-label="Remove slab">✕</button></div>').join('')+
     '<button type="button" class="btn" style="font-size:12px;padding:6px 10px" data-v123sadd="'+i+'">+ Slab</button></div>').join('')+
    '<button type="button" class="btn" id="v123Add">+ Product ചേർക്കുക</button>'+
-   '<h3 style="margin:16px 0 8px;font-size:15px">ഈ മാസം ഓരോ സ്റ്റാഫും</h3>'+
+   '<h3 style="margin:16px 0 4px;font-size:15px">ഈ മാസം ഓരോ സ്റ്റാഫും</h3><div class="v123-sub" style="margin-bottom:8px">☑ ടിക്ക് ഉള്ള സ്റ്റാഫിന് മാത്രം incentive. ടിക്ക് മാറ്റി Save ചെയ്യുക.</div>'+
    (staff.length?'<div class="tablewrap"><table class="tbl"><thead><tr><th>Staff</th><th>Sold</th><th style="text-align:right">Incentive</th><th style="text-align:right">Salary + Incentive</th></tr></thead><tbody>'+
-    staff.map(s=>{const r=window.v123Calc(s.display_name);const t=draft.targets[key(s.username)]||'';return '<tr><td><b>'+E(s.display_name)+'</b><div class="muted" style="font-size:11px">@'+E(s.username)+'</div></td><td>'+r.units+'</td><td style="text-align:right;white-space:nowrap">'+rs(r.incentive)+'</td><td style="text-align:right;white-space:nowrap"><b>'+rs(N(s.monthly_salary)+r.incentive)+'</b></td></tr>';}).join('')+'</tbody></table></div>'
+    staff.map(s=>{const r=window.v123Calc(s.display_name),u=key(s.username),on=!draft.off.includes(u),inc=on?r.incentive:0;return '<tr'+(on?'':' style="opacity:.6"')+'><td><label style="display:flex;gap:8px;align-items:flex-start;cursor:pointer"><input type="checkbox" data-v132on="'+E(u)+'"'+(on?' checked':'')+' style="width:20px;height:20px;margin-top:2px;flex:none"><span><b>'+E(s.display_name)+'</b><div class="muted" style="font-size:11px">@'+E(s.username)+(on?'':' · incentive ഇല്ല')+'</div></span></label></td><td>'+r.units+'</td><td style="text-align:right;white-space:nowrap">'+(on?rs(inc):'—')+'</td><td style="text-align:right;white-space:nowrap"><b>'+rs(N(s.monthly_salary)+inc)+'</b></td></tr>';}).join('')+'</tbody></table></div>'
     :'<div class="muted">Staff ലിസ്റ്റ് ലോഡ് ആകുന്നു…</div>')+
    '<div class="actions" style="margin-top:12px"><button type="button" class="btn primary" id="v123Save">Save</button><span id="v123Msg" style="font-weight:700;margin-left:8px"></span></div>';
  }
@@ -5680,6 +5682,7 @@ body.staff-dashboard-minimal #dashboard > #v123StaffTarget.card:not(#zz1):not(#z
  }
  document.addEventListener('change',e=>{
   const t=e.target;if(!draft)return;
+  if(t.matches&&t.matches('[data-v132on]')){readInputs();const u=t.dataset.v132on;draft.off=draft.off.filter(x=>x!==u);if(!t.checked)draft.off.push(u);ownerCard();return;}
   if(t.matches('[data-v123p]'))draft.products[Number(t.dataset.v123p)].name=t.value;
   else if(t.matches('[data-v123r]'))draft.products[Number(t.dataset.v123r)].perUnit=N(t.value);
   else if(t.matches('[data-v123t]')){const v=N(t.value);if(v>0)draft.targets[t.dataset.v123t]=Math.round(v);else delete draft.targets[t.dataset.v123t];}
@@ -5694,7 +5697,7 @@ body.staff-dashboard-minimal #dashboard > #v123StaffTarget.card:not(#zz1):not(#z
    document.querySelectorAll('[data-v123t]').forEach(i=>{const v=N(i.value);if(v>0)draft.targets[i.dataset.v123t]=Math.round(v);else delete draft.targets[i.dataset.v123t];});
    const products=draft.products.filter(p=>p.name&&N(p.perUnit)>0).map(p=>({name:String(p.name).trim(),perUnit:N(p.perUnit),slabs:(p.slabs||[]).map(x=>({above:Math.round(N(x.above)),rate:N(x.rate)})).filter(x=>x.above>=0&&x.rate>0).sort((a,b)=>a.above-b.above)}));
    const seen=new Set();for(const p of products){if(seen.has(key(p.name))){alert(p.name+' രണ്ടുതവണ ചേർത്തിട്ടുണ്ട്.');return;}seen.add(key(p.name));}
-   data.settings=data.settings||{};data.settings.incentives={products,targets:{...draft.targets},updatedAt:new Date().toISOString()};
+   data.settings=data.settings||{};data.settings.incentives={products,targets:{...draft.targets},off:[...draft.off],updatedAt:new Date().toISOString()};
    draft=null;ownerCard();const msg=t=>{const m=$('v123Msg');if(m)m.textContent=t;};msg('Saving…');
    try{if(typeof save==='function')save();const r=window.pushClinicNow?await window.pushClinicNow():{ok:true};msg(r&&r.ok===false?('ഈ ഫോണിൽ സേവ് ആയി; Cloud: '+(r.reason||'later')):'✓ Saved · staff ഫോണുകളിൽ ഉടനെ കാണാം');}catch(err){msg('Cloud sync പിന്നീട്: '+(err.message||''));}
   }
