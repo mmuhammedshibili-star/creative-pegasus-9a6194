@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/>
-<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0b3d2b"><title>MISRIYYA HEALTH CARE — V124 Staff target card fix</title>
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0b3d2b"><title>MISRIYYA HEALTH CARE — V125 Incentive slabs</title>
 <style>
 .nav-burger{flex-shrink:0;width:42px;height:42px;border:1px solid var(--line);background:#fff;border-radius:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:0}
 .nav-burger span{display:block;width:20px;height:2.5px;border-radius:2px;background:var(--ink)}
@@ -5510,7 +5510,7 @@ details.v140-hist li{margin-bottom:6px}
 <script>
 /* V116: tells the user when a newer version is published (checks a tiny version.json on GitHub Pages — not Supabase). */
 (function(){
- const APP_VER='124';
+ const APP_VER='125';
  let latest=null;
  async function check(){
   try{
@@ -5587,7 +5587,11 @@ body.staff-dashboard-minimal #dashboard > #v123StaffTarget.card:not(#zz1):not(#z
 .v123-earn{background:linear-gradient(135deg,#0b5d3b,#16834a);color:#fff;border-radius:16px;padding:14px 16px;margin-top:12px}
 .v123-earn .v123-big{color:#fff}
 .v123-earn .v123-sub{color:#d7efe2}
-.v123-prod{display:grid;grid-template-columns:1fr 110px 40px;gap:8px;align-items:center;margin-bottom:8px}
+.v123-pbox{border:1px solid #dfe9e3;border-radius:14px;padding:10px;margin-bottom:10px;background:#fbfdfc}
+.v123-prod{display:grid;grid-template-columns:1fr 96px 40px;gap:8px;align-items:center;margin-bottom:6px}
+.v123-slab{display:grid;grid-template-columns:auto 76px auto 76px 40px;gap:6px;align-items:center;font-size:13px;font-weight:600;color:#3d4f47;margin:4px 0}
+.v123-slab input{width:100%}
+.v123-next{font-size:12px;color:#b45309;font-weight:700;padding:0 0 6px}
 .v123-prod select,.v123-prod input{width:100%}
 </style>
 <script>
@@ -5604,21 +5608,22 @@ body.staff-dashboard-minimal #dashboard > #v123StaffTarget.card:not(#zz1):not(#z
   if(window.misriyyaRole==='owner')c=data&&data.settings&&data.settings.incentives;
   else{try{c=window.dispenserClinicSettings&&window.dispenserClinicSettings().incentives;}catch(_){}}
   c=(c&&typeof c==='object')?c:{};
-  return {products:Array.isArray(c.products)?c.products.filter(p=>p&&p.name):[],targets:(c.targets&&typeof c.targets==='object')?c.targets:{}};
+  return {products:Array.isArray(c.products)?c.products.filter(p=>p&&p.name).map(p=>({name:p.name,perUnit:N(p.perUnit),slabs:(Array.isArray(p.slabs)?p.slabs:[]).map(x=>({above:N(x&&x.above),rate:N(x&&x.rate)})).filter(x=>x.above>0&&x.rate>0).sort((a,b)=>a.above-b.above)})):[],targets:(c.targets&&typeof c.targets==='object')?c.targets:{}};
  }
  function bills(){return window.misriyyaRole==='owner'?(data.bills||[]):((window.dispenserRemoteBills&&window.dispenserRemoteBills())||[]);}
  const monthKey=d=>{const x=new Date(d);return x.getFullYear()+'-'+(x.getMonth()+1);};
  // units of incentive products sold by one staff (by display name) in a month
  window.v123Calc=function(staffName,when){
   const c=cfg(),mk=monthKey(when||new Date()),who=key(staffName);
-  const rate=new Map(c.products.map(p=>[key(p.name),N(p.perUnit)]));
+  const rate=new Map(c.products.map(p=>[key(p.name),p]));
   const per=new Map();
   for(const b of bills()){
    if(!b||!b.saleOnly||b.newCase||b.kind==='fee')continue;
    if(key(b.createdBy)!==who||monthKey(b.date)!==mk)continue;
    for(const it of (Array.isArray(b.items)?b.items:[])){const k=key(it&&it.name);if(!rate.has(k))continue;const q=N(it.qty);if(q<=0)continue;per.set(k,(per.get(k)||0)+q);}
   }
-  const rows=c.products.map(p=>{const q=per.get(key(p.name))||0;return {name:p.name,qty:q,rate:N(p.perUnit),amt:q*N(p.perUnit)};}).filter(r=>r.qty>0);
+  // slab: rate of the highest slab crossed applies to ALL units of that product (below first slab = base rate)
+  const rows=c.products.map(p=>{const q=per.get(key(p.name))||0;let rt=N(p.perUnit);for(const x of p.slabs)if(q>x.above)rt=x.rate;const nx=p.slabs.find(x=>q<=x.above&&x.rate>rt)||null;return {name:p.name,qty:q,rate:rt,amt:q*rt,next:nx?{need:nx.above+1-q,rate:nx.rate}:null};}).filter(r=>r.qty>0||r.next);
   return {units:rows.reduce((s,r)=>s+r.qty,0),incentive:rows.reduce((s,r)=>s+r.amt,0),rows,cfg:c};
  };
 
@@ -5633,7 +5638,7 @@ body.staff-dashboard-minimal #dashboard > #v123StaffTarget.card:not(#zz1):not(#z
   el.innerHTML='<h3>🎯 '+E(month)+' Target</h3>'+
    (target>0?'<div class="v123-big">'+r.units+' <span style="font-size:18px;color:#5b6b64">/ '+target+'</span></div><div class="v123-bar'+(done?' done':'')+'"><span style="width:'+pct+'%"></span></div><div class="v123-sub">'+(done?'🎉 Target പൂർത്തിയായി!':'ഇനി '+(target-r.units)+' എണ്ണം കൂടി')+' · '+pct+'%</div>'
     :'<div class="v123-sub">ഈ മാസത്തേക്ക് target സെറ്റ് ചെയ്തിട്ടില്ല.</div><div class="v123-big" style="margin-top:6px">'+r.units+' <span style="font-size:15px;color:#5b6b64">എണ്ണം വിറ്റു</span></div>')+
-   (r.rows.length?'<div style="margin-top:10px">'+r.rows.map(x=>'<div class="v123-row"><span>'+E(x.name)+' × '+x.qty+'</span><b>'+rs(x.amt)+'</b></div>').join('')+'</div>':'')+
+   (r.rows.length?'<div style="margin-top:10px">'+r.rows.map(x=>'<div class="v123-row"><span>'+E(x.name)+' × '+x.qty+(x.qty?' <span class="v123-sub">@ ₹'+x.rate+'</span>':'')+'</span><b>'+rs(x.amt)+'</b></div>'+(x.next?'<div class="v123-next">⬆ ഇനി '+x.next.need+' എണ്ണം കൂടി വിറ്റാൽ എല്ലാത്തിനും ₹'+x.next.rate+' വീതം</div>':'')).join('')+'</div>':'')+
    '<div class="v123-earn"><div class="v123-sub">Your earnings this month</div><div class="v123-big">'+rs(salary+r.incentive)+'</div><div class="v123-sub" style="margin-top:4px">Salary '+rs(salary)+' + Incentive '+rs(r.incentive)+'</div></div>';
  }
 
@@ -5644,19 +5649,27 @@ body.staff-dashboard-minimal #dashboard > #v123StaffTarget.card:not(#zz1):not(#z
   const sec=$('staffaccounts');if(!sec)return;
   let el=$('v123Owner');
   if(!el){el=document.createElement('div');el.id='v123Owner';el.className='card';el.style.marginTop='16px';(sec.querySelector('.grid')||sec).appendChild(el);}
-  if(!draft){const c=cfg();draft={products:c.products.map(p=>({name:p.name,perUnit:N(p.perUnit)})),targets:{...c.targets}};}
+  if(!draft){const c=cfg();draft={products:c.products.map(p=>({name:p.name,perUnit:N(p.perUnit),slabs:p.slabs.map(x=>({...x}))})),targets:{...c.targets}};}
   const meds=[...new Set((data.meds||[]).map(m=>String(m&&m.name||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
   const opt=sel=>'<option value="">— product —</option>'+meds.map(n=>'<option'+(key(n)===key(sel)?' selected':'')+'>'+E(n)+'</option>').join('')+(sel&&!meds.some(n=>key(n)===key(sel))?'<option selected>'+E(sel)+'</option>':'');
   const staff=(window.v123StaffList||[]).filter(s=>s&&s.is_active!==false);
   el.innerHTML='<h2>🎯 Targets &amp; Incentive</h2>'+
-   '<h3 style="margin:6px 0 8px;font-size:15px">Incentive products (ഒരു എണ്ണത്തിന് ₹)</h3>'+
-   draft.products.map((p,i)=>'<div class="v123-prod"><select data-v123p="'+i+'">'+opt(p.name)+'</select><input type="number" min="0" step="0.5" inputmode="decimal" data-v123r="'+i+'" value="'+E(p.perUnit||'')+'" placeholder="₹"><button type="button" class="btn" data-v123del="'+i+'" aria-label="Remove">✕</button></div>').join('')+
+   '<h3 style="margin:6px 0 4px;font-size:15px">Incentive products &amp; slabs</h3><div class="v123-sub" style="margin-bottom:8px">ആദ്യ ₹ = തുടക്ക rate. Slab കടന്നാൽ ആ മാസം വിറ്റ എല്ലാ എണ്ണത്തിനും പുതിയ rate.</div>'+
+   draft.products.map((p,i)=>'<div class="v123-pbox"><div class="v123-prod"><select data-v123p="'+i+'">'+opt(p.name)+'</select><input type="number" min="0" step="0.5" inputmode="decimal" data-v123r="'+i+'" value="'+E(p.perUnit||'')+'" placeholder="₹ / എണ്ണം"><button type="button" class="btn" data-v123del="'+i+'" aria-label="Remove">✕</button></div>'+
+    (p.slabs||[]).map((x,j)=>'<div class="v123-slab"><span>എണ്ണം</span><input type="number" min="1" step="1" inputmode="numeric" data-v123sa="'+i+'_'+j+'" value="'+E(x.above||'')+'" placeholder="200"><span>കടന്നാൽ ₹</span><input type="number" min="0" step="0.5" inputmode="decimal" data-v123sr="'+i+'_'+j+'" value="'+E(x.rate||'')+'" placeholder="7"><button type="button" class="btn" data-v123sdel="'+i+'_'+j+'" aria-label="Remove slab">✕</button></div>').join('')+
+    '<button type="button" class="btn" style="font-size:12px;padding:6px 10px" data-v123sadd="'+i+'">+ Slab</button></div>').join('')+
    '<button type="button" class="btn" id="v123Add">+ Product ചേർക്കുക</button>'+
    '<h3 style="margin:16px 0 8px;font-size:15px">Monthly target (എണ്ണം) · ഈ മാസം ഇതുവരെ</h3>'+
    (staff.length?'<div class="tablewrap"><table class="tbl"><thead><tr><th>Staff</th><th>Target</th><th>Sold</th><th style="text-align:right">Incentive</th><th style="text-align:right">Salary + Incentive</th></tr></thead><tbody>'+
     staff.map(s=>{const r=window.v123Calc(s.display_name);const t=draft.targets[key(s.username)]||'';return '<tr><td><b>'+E(s.display_name)+'</b><div class="muted" style="font-size:11px">@'+E(s.username)+'</div></td><td><input type="number" min="0" step="1" style="width:80px" data-v123t="'+E(key(s.username))+'" value="'+E(t)+'"></td><td>'+r.units+(t?' / '+E(t):'')+'</td><td style="text-align:right;white-space:nowrap">'+rs(r.incentive)+'</td><td style="text-align:right;white-space:nowrap"><b>'+rs(N(s.monthly_salary)+r.incentive)+'</b></td></tr>';}).join('')+'</tbody></table></div>'
     :'<div class="muted">Staff ലിസ്റ്റ് ലോഡ് ആകുന്നു…</div>')+
    '<div class="actions" style="margin-top:12px"><button type="button" class="btn primary" id="v123Save">Save</button><span id="v123Msg" style="font-weight:700;margin-left:8px"></span></div>';
+ }
+ function readInputs(){
+  if(!draft)return;
+  document.querySelectorAll('[data-v123p]').forEach(i=>{const p=draft.products[Number(i.dataset.v123p)];if(p)p.name=i.value;});
+  document.querySelectorAll('[data-v123r]').forEach(i=>{const p=draft.products[Number(i.dataset.v123r)];if(p)p.perUnit=N(i.value);});
+  document.querySelectorAll('[data-v123sa],[data-v123sr]').forEach(i=>{const [a,b]=(i.dataset.v123sa||i.dataset.v123sr).split('_').map(Number);const x=draft.products[a]&&draft.products[a].slabs[b];if(!x)return;if(i.dataset.v123sa!=null)x.above=Math.round(N(i.value));else x.rate=N(i.value);});
  }
  document.addEventListener('change',e=>{
   const t=e.target;if(!draft)return;
@@ -5665,12 +5678,14 @@ body.staff-dashboard-minimal #dashboard > #v123StaffTarget.card:not(#zz1):not(#z
   else if(t.matches('[data-v123t]')){const v=N(t.value);if(v>0)draft.targets[t.dataset.v123t]=Math.round(v);else delete draft.targets[t.dataset.v123t];}
  });
  document.addEventListener('click',async e=>{
-  if(e.target.closest('#v123Add')){draft.products.push({name:'',perUnit:5});ownerCard();return;}
-  const d=e.target.closest('[data-v123del]');if(d){draft.products.splice(Number(d.dataset.v123del),1);ownerCard();return;}
+  if(e.target.closest('#v123Add')){readInputs();draft.products.push({name:'',perUnit:5,slabs:[]});ownerCard();return;}
+  const d=e.target.closest('[data-v123del]');if(d){readInputs();draft.products.splice(Number(d.dataset.v123del),1);ownerCard();return;}
+  const sa=e.target.closest('[data-v123sadd]');if(sa){readInputs();const p=draft.products[Number(sa.dataset.v123sadd)];if(p){p.slabs=p.slabs||[];const last=p.slabs[p.slabs.length-1];p.slabs.push({above:last?last.above+100:100,rate:''});}ownerCard();return;}
+  const sd=e.target.closest('[data-v123sdel]');if(sd){readInputs();const [a,b]=sd.dataset.v123sdel.split('_').map(Number);if(draft.products[a])draft.products[a].slabs.splice(b,1);ownerCard();return;}
   if(e.target.closest('#v123Save')){
-   document.querySelectorAll('[data-v123r]').forEach(i=>{draft.products[Number(i.dataset.v123r)].perUnit=N(i.value);});
+   readInputs();
    document.querySelectorAll('[data-v123t]').forEach(i=>{const v=N(i.value);if(v>0)draft.targets[i.dataset.v123t]=Math.round(v);else delete draft.targets[i.dataset.v123t];});
-   const products=draft.products.filter(p=>p.name&&N(p.perUnit)>0).map(p=>({name:String(p.name).trim(),perUnit:N(p.perUnit)}));
+   const products=draft.products.filter(p=>p.name&&N(p.perUnit)>0).map(p=>({name:String(p.name).trim(),perUnit:N(p.perUnit),slabs:(p.slabs||[]).map(x=>({above:Math.round(N(x.above)),rate:N(x.rate)})).filter(x=>x.above>0&&x.rate>0).sort((a,b)=>a.above-b.above)}));
    const seen=new Set();for(const p of products){if(seen.has(key(p.name))){alert(p.name+' രണ്ടുതവണ ചേർത്തിട്ടുണ്ട്.');return;}seen.add(key(p.name));}
    data.settings=data.settings||{};data.settings.incentives={products,targets:{...draft.targets},updatedAt:new Date().toISOString()};
    draft=null;ownerCard();const msg=t=>{const m=$('v123Msg');if(m)m.textContent=t;};msg('Saving…');
